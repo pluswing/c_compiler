@@ -95,7 +95,7 @@ Token *tokenize(char *p) {
   return head.next;
 }
 
-int main(int argc, char**argv) {
+int main(int argc, char **argv) {
   if (argc != 2) {
     fprintf(stderr, "invalid args\n");
     return 1;
