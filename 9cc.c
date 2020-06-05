@@ -135,6 +135,10 @@ Node *new_node_num(int val) {
   return node;
 }
 
+Node *expr();
+Node *mul();
+Node *primary();
+
 // expr    = mul ("+" mul | "-" mul)*
 Node *expr() {
   Node *node = mul();
@@ -212,23 +216,15 @@ int main(int argc, char **argv) {
 
   user_input = argv[1];
   token = tokenize();
+  Node* node = expr();
 
   printf(".intel_syntax noprefix\n");
   printf(".globl main\n");
   printf("main:\n");
 
-  printf("  mov rax, %d\n", expect_number());
+  gen(node);
 
-  while (!at_eof()) {
-    if (consume('+')) {
-      printf("  add rax, %d\n", expect_number());
-      continue;
-    }
-
-    expect('-');
-    printf("  sub rax, %d\n", expect_number());
-  }
-
+  printf("  pop rax\n");
   printf("  ret\n");
   return 0;
 }
