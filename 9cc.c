@@ -35,6 +35,7 @@ struct Token {
   Token *next;
   int val;
   char *str;
+  int len;
 };
 
 Token *token;
@@ -54,17 +55,23 @@ void error_at(char *loc, char *fmt, ...) {
   exit(1);
 }
 
-bool consume(char op) {
-  if (token->kind != TK_RESRVED || token->str[0] != op) {
+bool consume(char* op) {
+  if (token->kind != TK_RESRVED ||
+      strlen(op) != token->len ||
+      memcmp(token->str, op, token->len)) {
+
     return false;
   }
   token = token->next;
   return true;
 }
 
-void expect(char op) {
-  if (token->kind != TK_RESRVED || token->str[0] != op) {
-    error_at(token->str, "'%c'ではありません", op);
+void expect(char* op) {
+  if (token->kind != TK_RESRVED ||
+      strlen(op) != token->len ||
+      memcmp(toke->str, op, token->len)) {
+
+    error_at(token->str, "\"%s\"ではありません", op);
   }
   token = token->next;
 }
@@ -82,12 +89,17 @@ bool at_eof() {
   return token->kind == TK_EOF;
 }
 
-Token *new_token(TokenKind kind, Token *cur, char *str) {
+Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   Token *tok = calloc(1, sizeof(Token));
   tok->kind = kind;
   tok->str = str;
+  tok->len = len;
   cur->next = tok;
   return tok;
+}
+
+bool startswith(char *p, char *q) {
+  return memcmp(p, q, strlen(q)) == 0;
 }
 
 Token *tokenize() {
@@ -102,21 +114,32 @@ Token *tokenize() {
       continue;
     }
 
-    if (strchr("+-*/()", *p)) {
-      cur = new_token(TK_RESRVED, cur, p++);
+    if (startswith(p, "==") ||
+        startswith(p, "!=") ||
+        startswith(p, "<=") ||
+        startswith(p, ">=")) {
+
+      cur = new_token(TK_RESRVED, cur, p, 2);
+      p += 2;
+      continue;
+    }
+    if (strchr("+-*/()<>", *p)) {
+      cur = new_token(TK_RESRVED, cur, p++, 1);
       continue;
     }
 
     if (isdigit(*p)) {
       cur = new_token(TK_NUM, cur, p);
+      char *q = p;
       cur->val = strtol(p, &p, 10);
+      cur->len = p - q;
       continue;
     }
 
     error_at(p, "expected a number");
   }
 
-  new_token(TK_EOF, cur, p);
+  new_token(TK_EOF, cur, p, 0);
   return head.next;
 }
 
@@ -168,13 +191,13 @@ Node *mul() {
   }
 }
 
-// unary   = ("+" | "-")? primary
+// unary   = ("+" | "-")? unary | primary
 Node *unary() {
   if (consume('+')) {
-    return primary();
+    return unary();
   }
   if (consume('-')) {
-    return new_node(ND_SUB, new_node_num(0), primary());
+    return new_node(ND_SUB, new_node_num(0), unary());
   }
   return primary();
 }
