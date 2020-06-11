@@ -28,7 +28,7 @@ assert 10 "-10+20"
 assert 10 "- -10"
 assert 10 "- - +10"
 
-assert 1 "0==1"
+assert 0 "0==1"
 assert 1 "42==42"
 assert 1 "0!=1"
 assert 0 "42!=42"
