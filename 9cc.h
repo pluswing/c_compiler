@@ -8,6 +8,7 @@
 // tokenize
 typedef enum {
   TK_RESRVED, // 記号
+  TK_IDENT, // 識別子
   TK_NUM, // 整数トークン
   TK_EOF, // 入力の終わりを表すトークン
 } TokenKind;
@@ -40,6 +41,8 @@ typedef enum {
   ND_SUB,
   ND_MUL,
   ND_DIV,
+  ND_ASSIGN, // =
+  ND_LVAR, // local variables
   ND_EQ,
   ND_NE,
   ND_LT, // <
@@ -53,13 +56,17 @@ struct Node {
   NodeKind kind;
   Node *lhs;
   Node *rhs;
-  int val;
+  int val;    // only kind == ND_NUM
+  int offset; // only kind == ND_LVAR
 };
 
 Node *new_node(NodeKind kind);
 Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+
+Node *assign();
 Node *expr();
+Node *stmt();
 Node *equality();
 Node *relational();
 Node *add();
