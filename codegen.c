@@ -134,9 +134,35 @@ Node *primary() {
   return new_node_num(expect_number());
 }
 
+void gen_lval(Node *node) {
+  if (node->kind != ND_LVAR) {
+    error_at("not ND_LVAR");
+  }
+
+  printf("  mov rax, rbp\n");
+  printf("  sub rax, %d", node->offset)
+  printf("  push rax\n");
+}
+
 void gen(Node *node) {
-  if (node->kind == ND_NUM) {
+  switch (node->kind) {
+  case ND_NUM:
     printf("  push %d\n", node->val);
+    return;
+  case ND_LVAR:
+    gen_lbal(node);
+    printf("  pop rax\n");
+    printf("  mov rax, [rax]\n");
+    printf("  push rax\n");
+    return;
+  case ND_ASSIGN:
+    gen_lval(node->lhs);
+    gen(node->rhs);
+
+    printf("  pop rdi\n");
+    printf("  pip rax\n");
+    printf("  mov [rax] rdi\n");
+    printf("  push rdi\n");
     return;
   }
 
