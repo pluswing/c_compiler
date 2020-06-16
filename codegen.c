@@ -24,7 +24,7 @@ Node *code[100];
 Node *assign() {
   Node *node = equality();
   if (consume("=")) {
-    node = new_node(ND_ASSIGN, node, assign())
+    node = new_binary(ND_ASSIGN, node, assign());
   }
   return node;
 }
@@ -36,7 +36,7 @@ Node *expr() {
 
 Node *stmt() {
   Node *node = expr();
-  expext(";");
+  expect(";");
   return node;
 }
 
@@ -136,11 +136,11 @@ Node *primary() {
 
 void gen_lval(Node *node) {
   if (node->kind != ND_LVAR) {
-    error_at("not ND_LVAR");
+    error("not ND_LVAR");
   }
 
   printf("  mov rax, rbp\n");
-  printf("  sub rax, %d", node->offset)
+  printf("  sub rax, %d\n", node->offset);
   printf("  push rax\n");
 }
 
@@ -150,7 +150,7 @@ void gen(Node *node) {
     printf("  push %d\n", node->val);
     return;
   case ND_LVAR:
-    gen_lbal(node);
+    gen_lval(node);
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
@@ -160,8 +160,8 @@ void gen(Node *node) {
     gen(node->rhs);
 
     printf("  pop rdi\n");
-    printf("  pip rax\n");
-    printf("  mov [rax] rdi\n");
+    printf("  pop rax\n");
+    printf("  mov [rax], rdi\n");
     printf("  push rdi\n");
     return;
   }

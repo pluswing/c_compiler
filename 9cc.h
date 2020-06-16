@@ -26,8 +26,10 @@ struct Token {
 extern Token *token;
 extern char *user_input;
 
+void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 bool consume(char *op);
+Token* consume_ident();
 void expect(char *op);
 int expect_number();
 bool at_eof();
@@ -59,6 +61,8 @@ struct Node {
   int val;    // only kind == ND_NUM
   int offset; // only kind == ND_LVAR
 };
+
+extern Node *code[];
 
 Node *new_node(NodeKind kind);
 Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);

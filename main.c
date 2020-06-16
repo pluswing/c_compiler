@@ -22,13 +22,13 @@ int main(int argc, char **argv) {
   for (int i = 0; code[i]; i++) {
     gen(code[i]);
 
-    printf("  pip rax\n");
+    printf("  pop rax\n");
   }
 
   // エピローグ
   printf("  mov rsp, rbp\n");
   printf("  pop rbp\n");
-  printg("  ret\n");
+  printf("  ret\n");
 
   return 0;
 }

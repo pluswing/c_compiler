@@ -3,6 +3,14 @@
 Token *token;
 char *user_input;
 
+void error(char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
 void error_at(char *loc, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -26,6 +34,16 @@ bool consume(char *op) {
   token = token->next;
   return true;
 }
+
+Token* consume_ident() {
+  if (token->kind != TK_IDENT) {
+    return NULL;
+  }
+  Token* tok = token;
+  token = token->next;
+  return tok;
+}
+
 
 void expect(char *op) {
   if (token->kind != TK_RESRVED ||
