@@ -2,6 +2,7 @@
 
 Token *token;
 char *user_input;
+LVar *locals;
 
 void error(char *fmt, ...) {
   va_list ap;
@@ -108,7 +109,13 @@ Token *tokenize() {
     }
 
     if ('a' <= *p && *p <= 'z') {
-      cur = new_token(TK_IDENT, cur, p++, 1);
+      char *c = p;
+      while('a' <= *c && *c <= 'z') {
+        c++;
+      }
+      int len = c - p;
+      cur = new_token(TK_IDENT, cur, p, len);
+      p = c;
       continue;
     }
 
@@ -125,4 +132,14 @@ Token *tokenize() {
 
   new_token(TK_EOF, cur, p, 0);
   return head.next;
+}
+
+LVar *find_lvar(Token * tok) {
+  for (LVar *var = locals; var; var = var->next) {
+    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) {
+
+      return var;
+    }
+  }
+  return NULL;
 }

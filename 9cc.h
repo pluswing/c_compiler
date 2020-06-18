@@ -23,8 +23,18 @@ struct Token {
   int len;
 };
 
+typedef struct LVar LVar;
+
+struct LVar {
+  LVar *next;
+  char *name;
+  int len;
+  int offset;
+};
+
 extern Token *token;
 extern char *user_input;
+extern LVar *locals;
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
@@ -36,6 +46,7 @@ bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 bool startswith(char *p, char *q);
 Token *tokenize();
+LVar *find_lvar(Token * tok);
 
 // codegen
 typedef enum {
