@@ -31,10 +31,23 @@ void program() {
   code[i] = NULL;
 }
 
+// stmt    = expr ";"
+//        | "return" expr ";"
+
 // stmt       = expr ";"
 Node *stmt() {
-  Node *node = expr();
+  Node *node;
+
+  if (consume_return()) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_RETURN;
+    node->lhs = expr();
+  } else {
+    node = expr();
+  }
+
   expect(";");
+
   return node;
 }
 
@@ -144,7 +157,11 @@ Node *primary() {
       lvar->next = locals;
       lvar->name = tok->str;
       lvar->len = tok->len;
-      lvar->offset = locals->offset + 8;
+      if (locals == NULL) {
+        lvar->offset = 8;
+      } else {
+        lvar->offset = locals->offset + 8;
+      }
       node->offset = lvar->offset;
       locals = lvar;
     }
@@ -166,6 +183,9 @@ void gen_lval(Node *node) {
 
 void gen(Node *node) {
   switch (node->kind) {
+  case ND_RETURN:
+    gen(node->lhs);
+    return;
   case ND_NUM:
     printf("  push %d\n", node->val);
     return;

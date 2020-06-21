@@ -46,6 +46,15 @@ Token* consume_ident() {
 }
 
 
+Token* consume_return() {
+  if (token->kind != TK_RETURN) {
+    return NULL;
+  }
+  Token* tok = token;
+  token = token->next;
+  return tok;
+}
+
 void expect(char *op) {
   if (token->kind != TK_RESRVED ||
       strlen(op) != token->len ||
@@ -82,6 +91,13 @@ bool startswith(char *p, char *q) {
   return memcmp(p, q, strlen(q)) == 0;
 }
 
+int is_alnum(char c) {
+  return ('a' <= c && c <= 'z') ||
+         ('A' <= c && c <= 'Z') ||
+         ('0' <= c && c <= '9') ||
+         (c == '_');
+}
+
 Token *tokenize() {
   char *p = user_input;
   Token head;
@@ -105,6 +121,12 @@ Token *tokenize() {
     }
     if (strchr("+-*/()<>=;", *p)) {
       cur = new_token(TK_RESRVED, cur, p++, 1);
+      continue;
+    }
+
+    if (startswith(p, "return") && !is_alnum(p[6])) {
+      cur = new_token(TK_RETURN, cur, p, 6);
+      p += 6;
       continue;
     }
 

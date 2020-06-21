@@ -51,4 +51,15 @@ assert 14 "a = 3;
 b = 5 * 6 - 8;
 a + b / 2;"
 
+assert 6 "foo = 1;
+bar = 2 + 3;
+foo + bar;"
+
+assert 14 "a = 3;
+b = 5 * 6 - 8;
+return a + b / 2;"
+
+assert 5 "return 5;
+return 8;"
+
 echo OK

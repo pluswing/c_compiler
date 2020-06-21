@@ -6,6 +6,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  locals = NULL;
   user_input = argv[1];
   token = tokenize();
   program();
