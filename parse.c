@@ -54,6 +54,15 @@ Token* consume_return() {
   token = token->next;
   return tok;
 }
+Token* consume_if() {
+  if (token->kind != TK_IF) {
+    return NULL;
+  }
+  Token* tok = token;
+  token = token->next;
+  return tok;
+}
+
 
 void expect(char *op) {
   if (token->kind != TK_RESRVED ||
@@ -130,6 +139,12 @@ Token *tokenize() {
       continue;
     }
 
+    if (startswith(p, "if") && !is_alnum(p[2])) {
+      cur = new_token(TK_IF, cur, p, 2);
+      p += 2;
+      continue;
+    }
+
     if ('a' <= *p && *p <= 'z') {
       char *c = p;
       while('a' <= *c && *c <= 'z') {
@@ -156,7 +171,7 @@ Token *tokenize() {
   return head.next;
 }
 
-LVar *find_lvar(Token * tok) {
+LVar *find_lvar(Token *tok) {
   for (LVar *var = locals; var; var = var->next) {
     if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) {
 

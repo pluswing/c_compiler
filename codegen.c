@@ -33,10 +33,19 @@ void program() {
 
 // stmt    = expr ";"
 //        | "return" expr ";"
-
-// stmt       = expr ";"
+//        | "if" "(" expr ")" stmt
 Node *stmt() {
   Node *node;
+
+  if (consume_if()) {
+    expect("(");
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_IF;
+    node->lhs = expr();
+    expect(")");
+    node->rhs = stmt();
+    return node;
+  }
 
   if (consume_return()) {
     node = calloc(1, sizeof(Node));
@@ -183,12 +192,19 @@ void gen_lval(Node *node) {
 
 void gen(Node *node) {
   switch (node->kind) {
+  case ND_IF:
+    gen(node->lhs);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  je .LendXXX\n");
+    gen(node->rhs);
+    printf(".LendXXX:\n");
   case ND_RETURN:
     gen(node->lhs);
     printf("  pop rax\n");
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
-    printf(" ret\n");
+    printf("  ret\n");
     return;
   case ND_NUM:
     printf("  push %d\n", node->val);

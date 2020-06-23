@@ -17,6 +17,7 @@ assert() {
   fi
 }
 
+# compare calc tests
 assert 0 "0;"
 assert 42 "42;"
 assert 21 "5+20-4;"
@@ -28,11 +29,13 @@ assert 10 "-10+20;"
 assert 10 "- -10;"
 assert 10 "- - +10;"
 
+# compare tests(1)
 assert 0 "0==1;"
 assert 1 "42==42;"
 assert 1 "0!=1;"
 assert 0 "42!=42;"
 
+# compare tests(2)
 assert 1 "0<1;"
 assert 0 "1<1;"
 assert 0 "2<1;"
@@ -40,6 +43,7 @@ assert 1 "0<=1;"
 assert 1 "1<=1;"
 assert 0 "2<=1;"
 
+# compare tests(3)
 assert 1 "1>0;"
 assert 0 "1>1;"
 assert 0 "1>2;"
@@ -47,19 +51,29 @@ assert 1 "1>=0;"
 assert 1 "1>=1;"
 assert 0 "1>=2;"
 
+# variable tests
 assert 14 "a = 3;
 b = 5 * 6 - 8;
 a + b / 2;"
-
 assert 6 "foo = 1;
 bar = 2 + 3;
 foo + bar;"
 
+# return tests
 assert 14 "a = 3;
 b = 5 * 6 - 8;
 return a + b / 2;"
-
 assert 5 "return 5;
 return 8;"
+
+# IF tests
+assert 3 "a = 3;
+if (a == 3) return a;
+return 5;
+"
+assert 5 "
+if (1 != 3) return 1;
+return 5;
+"
 
 echo OK
