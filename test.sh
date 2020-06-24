@@ -12,7 +12,7 @@ assert() {
   if [ "$actual" = "$expected" ]; then
     echo "$input => $actual"
   else
-    echo "$input => $expected expedted, but got $actual"
+    echo "$input => $expected expected, but got $actual"
     exit 1
   fi
 }
@@ -71,9 +71,12 @@ assert 3 "a = 3;
 if (a == 3) return a;
 return 5;
 "
-assert 5 "
-if (1 != 3) return 1;
+assert 5 "if (3 != 3) return 1;
 return 5;
+"
+assert 5 "if (3 != 3) return 1;
+else return 5;
+return 2;
 "
 
 echo OK

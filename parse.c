@@ -63,6 +63,15 @@ Token* consume_if() {
   return tok;
 }
 
+Token* consume_else() {
+  if (token->kind != TK_ELSE) {
+    return NULL;
+  }
+  Token* tok = token;
+  token = token->next;
+  return tok;
+}
+
 
 void expect(char *op) {
   if (token->kind != TK_RESRVED ||
@@ -142,6 +151,12 @@ Token *tokenize() {
     if (startswith(p, "if") && !is_alnum(p[2])) {
       cur = new_token(TK_IF, cur, p, 2);
       p += 2;
+      continue;
+    }
+
+    if (startswith(p, "else") && !is_alnum(p[4])) {
+      cur = new_token(TK_ELSE, cur, p, 4);
+      p += 4;
       continue;
     }
 
