@@ -39,21 +39,24 @@ void program() {
 Node *stmt() {
   Node *node;
 
-  if (consume_if()) {
+  if (consume_kind(TK_IF)) {
     expect("(");
     node = calloc(1, sizeof(Node));
     node->kind = ND_IF;
     node->lhs = expr();
     expect(")");
     node->rhs = stmt();
-    node->els = NULL;
-    if (consume_else()) {
-      node->els = stmt();
+    if (consume_kind(TK_ELSE)) {
+      Node *els = calloc(1, sizeof(Node));
+      els->kind = ND_ELSE;
+      els->lhs = node->rhs;
+      els->rhs = stmt();
+      node->rhs = els;
     }
     return node;
   }
 
-  if (consume_return()) {
+  if (consume_kind(TK_RETURN)) {
     node = calloc(1, sizeof(Node));
     node->kind = ND_RETURN;
     node->lhs = expr();
@@ -159,7 +162,7 @@ Node *primary() {
     return node;
   }
 
-  Token *tok = consume_ident();
+  Token *tok = consume_kind(TK_IDENT);
   if (tok) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
@@ -203,11 +206,15 @@ void gen(Node *node) {
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     printf("  je .LelseXXX\n");
-    gen(node->rhs);
+    if (node->rhs->kind == ND_ELSE) {
+      gen(node->rhs->lhs);
+    } else {
+      gen(node->rhs);
+    }
     printf("  jmp .LendXXX\n");
     printf(".LelseXXX:\n");
-    if (node->els) {
-      gen(node->els);
+    if (node->rhs->kind == ND_ELSE) {
+      gen(node->rhs->rhs);
     }
     printf(".LendXXX:\n");
     return;

@@ -12,7 +12,7 @@ typedef enum {
   TK_NUM, // 整数トークン
   TK_RETURN, // return
   TK_IF, // if
-  TK_ELSE, // ense
+  TK_ELSE, // else
   TK_EOF, // 入力の終わりを表すトークン
 } TokenKind;
 
@@ -42,10 +42,7 @@ extern LVar *locals;
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 bool consume(char *op);
-Token *consume_ident();
-Token *consume_return();
-Token *consume_if();
-Token *consume_else();
+Token *consume_kind(TokenKind kind);
 void expect(char *op);
 int expect_number();
 bool at_eof();
@@ -68,6 +65,7 @@ typedef enum {
   ND_LE, // <=
   ND_RETURN, // return
   ND_IF, // if
+  ND_ELSE, // else
   ND_NUM,
 } NodeKind;
 
@@ -77,7 +75,6 @@ struct Node {
   NodeKind kind;
   Node *lhs;
   Node *rhs;
-  Node *els;  // only kind == ND_IF
   int val;    // only kind == ND_NUM
   int offset; // only kind == ND_LVAR
 };
