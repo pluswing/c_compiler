@@ -79,4 +79,9 @@ else return 5;
 return 2;
 "
 
+# while
+assert 11 "i = 0;
+while (i <= 10) i = i + 1;
+return i;"
+
 echo OK

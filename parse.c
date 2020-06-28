@@ -88,6 +88,20 @@ int is_alnum(char c) {
          (c == '_');
 }
 
+typedef struct ReservedWord ReservedWord;
+struct ReservedWord {
+  char *word;
+  TokenKind kind;
+};
+
+ReservedWord reservedWords[] = {
+  {"return", TK_RETURN},
+  {"if", TK_IF},
+  {"else", TK_ELSE},
+  {"while", TK_WHILE},
+  {"", TK_EOF},
+};
+
 Token *tokenize() {
   char *p = user_input;
   Token head;
@@ -114,21 +128,19 @@ Token *tokenize() {
       continue;
     }
 
-    if (startswith(p, "return") && !is_alnum(p[6])) {
-      cur = new_token(TK_RETURN, cur, p, 6);
-      p += 6;
-      continue;
+    bool found = false;
+    for (int i = 0; reservedWords[i].kind != TK_EOF; i++) {
+      char *w = reservedWords[i].word;
+      int len = strlen(w);
+      TokenKind kind = reservedWords[i].kind;
+      if (startswith(p, w) && !is_alnum(p[len])) {
+        cur = new_token(kind, cur, p, len);
+        p += len;
+        found = true;
+        break;
+      }
     }
-
-    if (startswith(p, "if") && !is_alnum(p[2])) {
-      cur = new_token(TK_IF, cur, p, 2);
-      p += 2;
-      continue;
-    }
-
-    if (startswith(p, "else") && !is_alnum(p[4])) {
-      cur = new_token(TK_ELSE, cur, p, 4);
-      p += 4;
+    if (found) {
       continue;
     }
 
