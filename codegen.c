@@ -39,6 +39,29 @@ void program() {
 Node *stmt() {
   Node *node;
 
+  if (consume_kind(TK_FOR)) {
+    expect("(");
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_FOR;
+
+    Node * left = calloc(1, sizeof(Node));
+    left->kind = ND_FOR_LEFT;
+    Node * right = calloc(1, sizeof(Node));
+    right->kind = ND_FOR_RIGHT;
+
+    left->lhs = expr();
+    expect(";");
+    left->rhs = expr();
+    expect(";");
+    right->lhs = expr();
+    expect(")");
+    right->rhs = stmt();
+
+    node->lhs = left;
+    node->rhs = right;
+    return node;
+  }
+
   if (consume_kind(TK_WHILE)) {
     expect("(");
     node = calloc(1, sizeof(Node));
@@ -211,6 +234,18 @@ void gen_lval(Node *node) {
 
 void gen(Node *node) {
   switch (node->kind) {
+  case ND_FOR:
+    gen(node->lhs->lhs);
+    printf(".LbeginXXX:\n");
+    gen(node->lhs->rhs);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  je .LendXXX\n");
+    gen(node->rhs->rhs);
+    gen(node->rhs->lhs);
+    printf("  jmp .LbeginXXX\n");
+    printf(".LendXXX:\n");
+    return;
   case ND_WHILE:
     printf(".LbeginXXX:\n");
     gen(node->lhs);

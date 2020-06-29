@@ -99,6 +99,7 @@ ReservedWord reservedWords[] = {
   {"if", TK_IF},
   {"else", TK_ELSE},
   {"while", TK_WHILE},
+  {"for", TK_FOR},
   {"", TK_EOF},
 };
 

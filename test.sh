@@ -84,4 +84,9 @@ assert 11 "i = 0;
 while (i <= 10) i = i + 1;
 return i;"
 
+# for
+assert 30 "a = 0;
+for (i = 0; i < 10; i = i + 1) a = a + 2;
+return i + a;"
+
 echo OK
