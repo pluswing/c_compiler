@@ -72,6 +72,7 @@ typedef enum {
   ND_FOR, // for
   ND_FOR_LEFT,
   ND_FOR_RIGHT,
+  ND_BLOCK,
   ND_NUM,
 } NodeKind;
 
@@ -81,6 +82,7 @@ struct Node {
   NodeKind kind;
   Node *lhs;
   Node *rhs;
+  Node **block; // only kind == ND_BLOCK
   int val;    // only kind == ND_NUM
   int offset; // only kind == ND_LVAR
 };

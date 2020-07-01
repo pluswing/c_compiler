@@ -19,6 +19,7 @@ Node *new_node_num(int val) {
   return node;
 }
 
+// TODO 100
 Node *code[100];
 
 
@@ -32,21 +33,32 @@ void program() {
 }
 
 // stmt    = expr ";"
+//        | "{" stmt* "}"
 //        | "return" expr ";"
 //        | "if" "(" expr ")" stmt ("else" stmt)?
 //        | "while" "(" expr ")" stmt
 //        | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 Node *stmt() {
   Node *node;
+  if (consume("{")) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_BLOCK;
+    // TODO 100
+    node->block = calloc(100, sizeof(Node));
+    for(int i = 0; !consume("}"); i++) {
+      node->block[i] = stmt();
+    }
+    return node;
+  }
 
   if (consume_kind(TK_FOR)) {
     expect("(");
     node = calloc(1, sizeof(Node));
     node->kind = ND_FOR;
 
-    Node * left = calloc(1, sizeof(Node));
+    Node *left = calloc(1, sizeof(Node));
     left->kind = ND_FOR_LEFT;
-    Node * right = calloc(1, sizeof(Node));
+    Node *right = calloc(1, sizeof(Node));
     right->kind = ND_FOR_RIGHT;
 
     if (!consume(";")) {
@@ -248,14 +260,18 @@ void gen(Node *node) {
   int id = genCounter;
 
   switch (node->kind) {
+  case ND_BLOCK:
+    for (int i = 0; node->block[i]; i++) {
+      gen(node->block[i]);
+      printf("  pop rax\n");
+    }
+    return;
   case ND_FOR:
     gen(node->lhs->lhs);
     printf(".Lbegin%03d:\n", id);
     gen(node->lhs->rhs);
-    // FIXME lhs->lhsが空の時、
-    // pop raxがとる値は予期しないものになっていそう。
     if (!node->lhs->rhs) {
-      printf("  push rax 1\n");
+      printf("  push 1\n");
     }
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");

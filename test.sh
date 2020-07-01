@@ -91,13 +91,22 @@ return i + a;"
 assert 10 "a = 0;
 for (;a < 10;) a = a + 1;
 return a;"
-# assert 0 "for(;;) 10;
-# return 5;"
 
 # multi contorl syntax
 assert 6 "a = 3;
 if (a == 1) return 4;
 if (a == 2) return 5;
 if (a == 3) return 6;"
+assert 10 "a = 0;
+for(;;a = a + 1) if (a == 5) return 10;
+return 2;"
+
+# block
+assert 10 "a = 0;
+for(;;) {
+  a = a + 1;
+  if (a == 5) return 10;
+}
+return 2;"
 
 echo OK
