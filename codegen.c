@@ -207,7 +207,9 @@ Node *unary() {
   return primary();
 }
 
-// primary    = num | ident | "(" expr ")"
+// primary = num
+//        | ident ("(" ")")?
+//        | "(" expr ")"
 Node *primary() {
   if (consume("(")) {
     Node *node = expr();
@@ -217,6 +219,15 @@ Node *primary() {
 
   Token *tok = consume_kind(TK_IDENT);
   if (tok) {
+    if (consume("(")) {
+      // 関数呼び出し
+      Node *node = calloc(1, sizeof(Node));
+      node->kind = ND_FUNC;
+      node->funcname = tok->str;
+      node->len = tok->len;
+      expect(")");
+      return node;
+    }
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
 
@@ -258,8 +269,13 @@ void gen(Node *node) {
   if (!node) return;
   genCounter += 1;
   int id = genCounter;
+  char name[100] = {0};
 
   switch (node->kind) {
+  case ND_FUNC:
+    memcpy(name, node->funcname, node->len);
+    printf("  call %s\n", name);
+    return;
   case ND_BLOCK:
     for (int i = 0; node->block[i]; i++) {
       gen(node->block[i]);

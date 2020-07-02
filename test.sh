@@ -109,4 +109,7 @@ for(;;) {
 }
 return 2;"
 
+# func
+assert 0 "foo();"
+
 echo OK
