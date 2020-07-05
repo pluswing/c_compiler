@@ -208,7 +208,7 @@ Node *unary() {
 }
 
 // primary = num
-//        | ident ("(" ")")?
+//        | ident ("(" expr* ")")?
 //        | "(" expr ")"
 Node *primary() {
   if (consume("(")) {
@@ -225,7 +225,15 @@ Node *primary() {
       node->kind = ND_FUNC;
       node->funcname = tok->str;
       node->len = tok->len;
-      expect(")");
+      // 引数 TODO とりあえず10個まで。
+      node->block = calloc(10, sizeof(Node));
+      for(int i = 0; !consume(")"); i++) {
+        node->block[i] = expr();
+        if (consume(")")) {
+          break;
+        }
+        expect(",");
+      }
       return node;
     }
     Node *node = calloc(1, sizeof(Node));
@@ -274,6 +282,12 @@ void gen(Node *node) {
   switch (node->kind) {
   case ND_FUNC:
     memcpy(name, node->funcname, node->len);
+    for (int i = 0; node->block[i]; i++) {
+      gen(node->block[i]);
+    }
+    // 引数が２つ。
+    printf("  pop rsi\n");
+    printf("  pop rdi\n");
     printf("  call %s\n", name);
     return;
   case ND_BLOCK:

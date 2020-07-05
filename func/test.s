@@ -1,4 +1,8 @@
 .intel_syntax noprefix
 .globl main
 main:
-  call foo
+  push 3
+  push 4
+  pop rsi
+  pop rdi
+  call bar
