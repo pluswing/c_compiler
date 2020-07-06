@@ -147,7 +147,7 @@ Token *tokenize() {
 
     if ('a' <= *p && *p <= 'z') {
       char *c = p;
-      while('a' <= *c && *c <= 'z') {
+      while(is_alnum(*c)) {
         c++;
       }
       int len = c - p;

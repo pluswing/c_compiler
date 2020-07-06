@@ -115,5 +115,6 @@ return 2;"
 # func
 assert 0 "foo();"
 assert 0 "bar(3, 4);"
+assert 0 "bar2(3, 4, 5);"
 
 echo OK

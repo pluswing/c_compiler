@@ -272,6 +272,7 @@ void gen_lval(Node *node) {
 }
 
 int genCounter = 0;
+char *argRegs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 void gen(Node *node) {
   if (!node) return;
@@ -282,12 +283,14 @@ void gen(Node *node) {
   switch (node->kind) {
   case ND_FUNC:
     memcpy(name, node->funcname, node->len);
+    int argCount = 0;
     for (int i = 0; node->block[i]; i++) {
       gen(node->block[i]);
+      argCount++;
     }
-    // 引数が２つ。
-    printf("  pop rsi\n");
-    printf("  pop rdi\n");
+    for (int i = argCount - 1; i >= 0; i--) {
+      printf("  pop %s\n", argRegs[i]);
+    }
     printf("  call %s\n", name);
     return;
   case ND_BLOCK:
