@@ -291,7 +291,18 @@ void gen(Node *node) {
     for (int i = argCount - 1; i >= 0; i--) {
       printf("  pop %s\n", argRegs[i]);
     }
+    printf("  mov rax, rsp\n");
+    printf("  and rax, 15\n");
+    printf("  jnz .L.call.%03d\n", id);
+    printf("  mov rax, 0\n");
     printf("  call %s\n", name);
+    printf("  jmp .L.end.%03d\n", id);
+    printf(".L.call.%03d:\n", id);
+    printf("  sub rsp, 8\n");
+    printf("  mov rax, 0\n");
+    printf("  call %s\n", name);
+    printf("  add rsp, 8\n");
+    printf(".L.end.%03d:\n", id);
     return;
   case ND_BLOCK:
     for (int i = 0; node->block[i]; i++) {
