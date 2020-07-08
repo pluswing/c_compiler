@@ -23,13 +23,36 @@ Node *new_node_num(int val) {
 Node *code[100];
 
 
-// program    = stmt*
+// program    = func*
 void program() {
   int i = 0;
   while(!at_eof()) {
-    code[i++] = stmt();
+    code[i++] = func();
   }
   code[i] = NULL;
+}
+
+// func = ident "(" ")" "{" stmt* "}"
+Node *func() {
+  Node *node;
+  Token *tok = consume_kind(TK_IDENT);
+  if (tok == NULL) {
+    error("not function!");
+  }
+  node = calloc(1, sizeof(Node));
+  node->kind = ND_BLOCK;
+  node->funcname = calloc(100, sizeof(char));
+  memcpy(node->funcname, tok->str, tok->len);
+  expect("(");
+  // TODO args
+  expect(")");
+  expect("{");
+  // TODO 100
+  node->block = calloc(100, sizeof(Node));
+  for(int i = 0; !consume("}"); i++) {
+    node->block[i] = stmt();
+  }
+  return node;
 }
 
 // stmt    = expr ";"
@@ -222,9 +245,9 @@ Node *primary() {
     if (consume("(")) {
       // 関数呼び出し
       Node *node = calloc(1, sizeof(Node));
-      node->kind = ND_FUNC;
-      node->funcname = tok->str;
-      node->len = tok->len;
+      node->kind = ND_FUNC_CALL;
+      node->funcname = calloc(100, sizeof(char));
+      memcpy(node->funcname, tok->str, tok->len);
       // 引数 TODO とりあえず10個まで。
       node->block = calloc(10, sizeof(Node));
       for(int i = 0; !consume(")"); i++) {
@@ -278,12 +301,10 @@ void gen(Node *node) {
   if (!node) return;
   genCounter += 1;
   int id = genCounter;
-  char name[100] = {0};
+  int argCount = 0;
 
   switch (node->kind) {
-  case ND_FUNC:
-    memcpy(name, node->funcname, node->len);
-    int argCount = 0;
+  case ND_FUNC_CALL:
     for (int i = 0; node->block[i]; i++) {
       gen(node->block[i]);
       argCount++;
@@ -295,12 +316,12 @@ void gen(Node *node) {
     printf("  and rax, 15\n");
     printf("  jnz .L.call.%03d\n", id);
     printf("  mov rax, 0\n");
-    printf("  call %s\n", name);
+    printf("  call %s\n", node->funcname);
     printf("  jmp .L.end.%03d\n", id);
     printf(".L.call.%03d:\n", id);
     printf("  sub rsp, 8\n");
     printf("  mov rax, 0\n");
-    printf("  call %s\n", name);
+    printf("  call %s\n", node->funcname);
     printf("  add rsp, 8\n");
     printf(".L.end.%03d:\n", id);
     return;

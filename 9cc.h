@@ -73,7 +73,8 @@ typedef enum {
   ND_FOR_LEFT,
   ND_FOR_RIGHT,
   ND_BLOCK, // { ... }
-  ND_FUNC, // 関数
+  ND_FUNC_CALL, // 関数呼び出し
+  ND_FUNC_DEF, // 関数定義
   ND_NUM,
 } NodeKind;
 
@@ -83,9 +84,8 @@ struct Node {
   NodeKind kind;
   Node *lhs;
   Node *rhs;
-  Node **block; // only kind == ND_BLOCK
-  char *funcname; // only kind == ND_FUNC
-  int len; // only kind == ND_FUNC
+  Node **block; // only kind == ND_BLOCK, ND_FUNC*
+  char *funcname; // only kind == ND_FUNC*
   int val;    // only kind == ND_NUM
   int offset; // only kind == ND_LVAR
 };
@@ -97,6 +97,7 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 
 void program();
+Node *func();
 Node *stmt();
 Node *expr();
 Node *assign();
