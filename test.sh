@@ -21,7 +21,22 @@ assert() {
 }
 
 # compare calc tests
-assert 0 "main () { return 1;}"
+assert 2 "main () { return 2;}"
+assert 2 "main () return 2;"
+assert 2 "
+main() return func();
+func() { return 2; }
+"
+
+# assert 55 "main () {
+#   return flactal(10);
+# }
+# flactal(n) {
+#   if (n < 0) return 0;
+#   return n + flactal(n - 1);
+# }
+# "
+
 # assert 42 "42;"
 # assert 21 "5+20-4;"
 # assert 41 " 12 + 34 - 5 ;"

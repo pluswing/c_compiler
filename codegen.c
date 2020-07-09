@@ -40,18 +40,13 @@ Node *func() {
     error("not function!");
   }
   node = calloc(1, sizeof(Node));
-  node->kind = ND_BLOCK;
+  node->kind = ND_FUNC_DEF;
   node->funcname = calloc(100, sizeof(char));
   memcpy(node->funcname, tok->str, tok->len);
   expect("(");
   // TODO args
   expect(")");
-  expect("{");
-  // TODO 100
-  node->block = calloc(100, sizeof(Node));
-  for(int i = 0; !consume("}"); i++) {
-    node->block[i] = stmt();
-  }
+  node->lhs = stmt();
   return node;
 }
 
@@ -304,6 +299,21 @@ void gen(Node *node) {
   int argCount = 0;
 
   switch (node->kind) {
+  case ND_FUNC_DEF:
+    printf("%s:\n", node->funcname);
+    // プロローグ
+    printf("  push rbp\n");
+    printf("  mov rbp, rsp\n");
+    printf("  sub rsp, 208\n"); // TODO 引数の数*8を指定する
+
+    gen(node->lhs);
+
+    // エピローグ
+    // printf("  mov rax, 0");  -> FIXME 必要？？
+    printf("  mov rsp, rbp\n");
+    printf("  pop rbp\n");
+    printf("  ret\n");
+    return;
   case ND_FUNC_CALL:
     for (int i = 0; node->block[i]; i++) {
       gen(node->block[i]);
@@ -324,6 +334,7 @@ void gen(Node *node) {
     printf("  call %s\n", node->funcname);
     printf("  add rsp, 8\n");
     printf(".L.end.%03d:\n", id);
+    printf("  push rax\n"); // FIXME あってる？？
     return;
   case ND_BLOCK:
     for (int i = 0; node->block[i]; i++) {
