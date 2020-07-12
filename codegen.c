@@ -32,7 +32,7 @@ void program() {
   code[i] = NULL;
 }
 
-// func = ident "(" ")" "{" stmt* "}"
+// func = ident "(" ident* ")" stmt*
 Node *func() {
   Node *node;
   Token *tok = consume_kind(TK_IDENT);
@@ -42,10 +42,24 @@ Node *func() {
   node = calloc(1, sizeof(Node));
   node->kind = ND_FUNC_DEF;
   node->funcname = calloc(100, sizeof(char));
+  node->args = calloc(10, sizeof(char*));
   memcpy(node->funcname, tok->str, tok->len);
   expect("(");
-  // TODO args
-  expect(")");
+  int i = 0;
+  while (1) {
+    Token *tok = consume_kind(TK_IDENT);
+    if (tok == NULL) {
+      expect(")");
+      break;
+    }
+    node->args[i] = calloc(100, sizeof(char));
+    memcpy(node->args[i], tok->str, tok->len);
+    i++;
+    if (consume(")")) {
+      break;
+    }
+    expect(",");
+  }
   node->lhs = stmt();
   return node;
 }
@@ -304,7 +318,15 @@ void gen(Node *node) {
     // プロローグ
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, 208\n"); // TODO 引数の数*8を指定する
+    int argsCount = 0;
+    for (int i = 0; node->args[i]; i++) {
+      argsCount = i;
+    }
+    printf("  sub rsp, %d\n", argsCount * 8);
+    // 引数の値をスタックに積む
+    for (int i = 0; node->args[i]; i++) {
+      printf("push %s", argRegs[i]);
+    }
 
     gen(node->lhs);
 

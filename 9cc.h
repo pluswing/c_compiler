@@ -84,8 +84,9 @@ struct Node {
   NodeKind kind;
   Node *lhs;
   Node *rhs;
-  Node **block; // only kind == ND_BLOCK, ND_FUNC*
+  Node **block; // only kind == ND_BLOCK
   char *funcname; // only kind == ND_FUNC*
+  char **args; // only kind == ND_FUNC_DEF
   int val;    // only kind == ND_NUM
   int offset; // only kind == ND_LVAR
 };

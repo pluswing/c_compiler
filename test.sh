@@ -24,8 +24,8 @@ assert() {
 assert 2 "main () { return 2;}"
 assert 2 "main () return 2;"
 assert 2 "
-main() return func();
-func() { return 2; }
+main() return func(1, 2);
+func(a, b) { return 2; }
 "
 
 # assert 55 "main () {
