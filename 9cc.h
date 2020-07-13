@@ -86,7 +86,7 @@ struct Node {
   Node *rhs;
   Node **block; // only kind == ND_BLOCK
   char *funcname; // only kind == ND_FUNC*
-  char **args; // only kind == ND_FUNC_DEF
+  Node **args; // only kind == ND_FUNC_DEF
   int val;    // only kind == ND_NUM
   int offset; // only kind == ND_LVAR
 };
@@ -108,6 +108,7 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+Node* variable(Token *tok);
 
 void gen_lval(Node *node);
 void gen(Node *node);

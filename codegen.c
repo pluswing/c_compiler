@@ -32,7 +32,7 @@ void program() {
   code[i] = NULL;
 }
 
-// func = ident "(" ident* ")" stmt*
+// func = ident "(" ident* ")" stmt
 Node *func() {
   Node *node;
   Token *tok = consume_kind(TK_IDENT);
@@ -42,19 +42,15 @@ Node *func() {
   node = calloc(1, sizeof(Node));
   node->kind = ND_FUNC_DEF;
   node->funcname = calloc(100, sizeof(char));
-  node->args = calloc(10, sizeof(char*));
+  node->args = calloc(10, sizeof(Node*));
   memcpy(node->funcname, tok->str, tok->len);
   expect("(");
-  int i = 0;
-  while (1) {
+
+  for (int i = 0; !consume(")"); i++) {
     Token *tok = consume_kind(TK_IDENT);
-    if (tok == NULL) {
-      expect(")");
-      break;
+    if (tok != NULL) {
+      node->args[i] = variable(tok);
     }
-    node->args[i] = calloc(100, sizeof(char));
-    memcpy(node->args[i], tok->str, tok->len);
-    i++;
     if (consume(")")) {
       break;
     }
@@ -268,29 +264,37 @@ Node *primary() {
       }
       return node;
     }
-    Node *node = calloc(1, sizeof(Node));
-    node->kind = ND_LVAR;
-
-    LVar *lvar = find_lvar(tok);
-    if (lvar) {
-      node->offset = lvar->offset;
-    } else {
-      lvar = calloc(1, sizeof(LVar));
-      lvar->next = locals;
-      lvar->name = tok->str;
-      lvar->len = tok->len;
-      if (locals == NULL) {
-        lvar->offset = 8;
-      } else {
-        lvar->offset = locals->offset + 8;
-      }
-      node->offset = lvar->offset;
-      locals = lvar;
-    }
-    return node;
+    // 関数呼び出しではない場合、変数。
+    return variable(tok);
   }
 
   return new_node_num(expect_number());
+}
+
+Node* variable(Token *tok) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_LVAR;
+
+  LVar *lvar = find_lvar(tok);
+  if (lvar) {
+    node->offset = lvar->offset;
+  } else {
+    lvar = calloc(1, sizeof(LVar));
+    lvar->next = locals;
+    lvar->name = tok->str;
+    lvar->len = tok->len;
+    if (locals == NULL) {
+      lvar->offset = 8;
+    } else {
+      lvar->offset = locals->offset + 8;
+    }
+    node->offset = lvar->offset;
+    locals = lvar;
+    char name[100] = {0};
+    memcpy(name, tok->str, tok->len);
+    fprintf(stderr, "*NEW VARIABLE* %s\n", name);
+  }
+  return node;
 }
 
 void gen_lval(Node *node) {
@@ -318,14 +322,9 @@ void gen(Node *node) {
     // プロローグ
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    int argsCount = 0;
-    for (int i = 0; node->args[i]; i++) {
-      argsCount = i;
-    }
-    printf("  sub rsp, %d\n", argsCount * 8);
     // 引数の値をスタックに積む
     for (int i = 0; node->args[i]; i++) {
-      printf("push %s", argRegs[i]);
+      printf("  push %s\n", argRegs[i]);
     }
 
     gen(node->lhs);

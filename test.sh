@@ -23,19 +23,24 @@ assert() {
 # compare calc tests
 assert 2 "main () { return 2;}"
 assert 2 "main () return 2;"
-assert 2 "
+assert 3 "
 main() return func(1, 2);
-func(a, b) { return 2; }
+func(a, b) { return a + b; }
+"
+assert 4 "
+main() return func(1, 2, 3);
+func(a, b, c) { return a + c; }
 "
 
-# assert 55 "main () {
-#   return flactal(10);
-# }
-# flactal(n) {
-#   if (n < 0) return 0;
-#   return n + flactal(n - 1);
-# }
-# "
+assert 55 "main () {
+  a = 10;
+  return sum(a);
+}
+sum(n) {
+  if (n < 0) return 0;
+  return n + sum(n - 1);
+}
+"
 
 # assert 42 "42;"
 # assert 21 "5+20-4;"
