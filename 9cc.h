@@ -39,7 +39,8 @@ struct LVar {
 
 extern Token *token;
 extern char *user_input;
-extern LVar *locals;
+extern LVar *locals[];
+extern int cur_func;
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);

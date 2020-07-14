@@ -34,6 +34,7 @@ void program() {
 
 // func = ident "(" ident* ")" stmt
 Node *func() {
+  cur_func++;
   Node *node;
   Token *tok = consume_kind(TK_IDENT);
   if (tok == NULL) {
@@ -280,16 +281,16 @@ Node* variable(Token *tok) {
     node->offset = lvar->offset;
   } else {
     lvar = calloc(1, sizeof(LVar));
-    lvar->next = locals;
+    lvar->next = locals[cur_func];
     lvar->name = tok->str;
     lvar->len = tok->len;
-    if (locals == NULL) {
+    if (locals[cur_func] == NULL) {
       lvar->offset = 8;
     } else {
-      lvar->offset = locals->offset + 8;
+      lvar->offset = locals[cur_func]->offset + 8;
     }
     node->offset = lvar->offset;
-    locals = lvar;
+    locals[cur_func] = lvar;
     char name[100] = {0};
     memcpy(name, tok->str, tok->len);
     fprintf(stderr, "*NEW VARIABLE* %s\n", name);
@@ -325,6 +326,13 @@ void gen(Node *node) {
     // 引数の値をスタックに積む
     for (int i = 0; node->args[i]; i++) {
       printf("  push %s\n", argRegs[i]);
+      argCount++;
+    }
+    // 引数の数を除いた変数の数分rspをずらして、変数領域を確保する。
+    if (locals[cur_func]) {
+      int offset = locals[cur_func][0].offset;
+      offset -= argCount * 8;
+      printf("  sub rsp, %d\n", offset);
     }
 
     gen(node->lhs);
@@ -360,7 +368,8 @@ void gen(Node *node) {
   case ND_BLOCK:
     for (int i = 0; node->block[i]; i++) {
       gen(node->block[i]);
-      printf("  pop rax\n");
+      // TODO 要確認。
+      // printf("  pop rax\n");
     }
     return;
   case ND_FOR:
