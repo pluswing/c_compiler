@@ -150,4 +150,17 @@ assert 1 "main() return foo();"
 assert 7 "main() return bar(3, 4);"
 assert 12 "main() return bar2(3, 4, 5);"
 
+# &, *
+assert 3 "main() {
+  x = 3;
+  y = &x;
+  return *y;
+}"
+assert 3 "main() {
+  x = 3;
+  y = 5;
+  z = &y + 8;
+  return *z;
+}"
+
 echo OK

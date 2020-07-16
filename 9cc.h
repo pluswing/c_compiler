@@ -76,6 +76,8 @@ typedef enum {
   ND_BLOCK, // { ... }
   ND_FUNC_CALL, // 関数呼び出し
   ND_FUNC_DEF, // 関数定義
+  ND_ADDR, // &
+  ND_DEREF, // *
   ND_NUM,
 } NodeKind;
 

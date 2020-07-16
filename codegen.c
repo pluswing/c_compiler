@@ -225,13 +225,22 @@ Node *mul() {
   }
 }
 
-// unary      = ("+" | "-")? primary
+// unary = "+"? primary
+//       | "-"? primary
+//       | "*" unary
+//       | "&" unary
 Node *unary() {
   if (consume("+")) {
     return unary();
   }
   if (consume("-")) {
     return new_binary(ND_SUB, new_node_num(0), unary());
+  }
+  if (consume("*")) {
+    return new_binary(ND_DEREF, unary(), NULL);
+  }
+  if (consume("&")) {
+    return new_binary(ND_ADDR, unary(), NULL);
   }
   return primary();
 }
@@ -318,6 +327,15 @@ void gen(Node *node) {
   int argCount = 0;
 
   switch (node->kind) {
+  case ND_ADDR:
+    gen_lval(node->lhs);
+    return;
+  case ND_DEREF:
+    gen(node->lhs);
+    printf("  pop rax\n");
+    printf("  mov rax, [rax]\n");
+    printf("  push rax\n");
+    return;
   case ND_FUNC_DEF:
     printf("%s:\n", node->funcname);
     // プロローグ
