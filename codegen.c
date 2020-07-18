@@ -32,7 +32,7 @@ void program() {
   code[i] = NULL;
 }
 
-// func = ident "(" ident* ")" stmt
+// func = "int" ident "(" ("int" ident ("," "int" ident)*)? ")" stmt
 Node *func() {
   cur_func++;
   Node *node;
@@ -67,6 +67,7 @@ Node *func() {
 //        | "if" "(" expr ")" stmt ("else" stmt)?
 //        | "while" "(" expr ")" stmt
 //        | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+//        | "int" ident ";"
 Node *stmt() {
   Node *node;
   if (consume("{")) {
@@ -142,12 +143,19 @@ Node *stmt() {
     node = calloc(1, sizeof(Node));
     node->kind = ND_RETURN;
     node->lhs = expr();
-  } else {
-    node = expr();
+    expect(";");
+    return node;
   }
 
-  expect(";");
+  if (consume_kind(TK_TYPE)) {
+    Token *tok = consume_kind(TK_IDENT);
+    node = define_variable(tok);
+    expect(";");
+    return node;
+  }
 
+  node = expr();
+  expect(";");
   return node;
 }
 
@@ -281,29 +289,41 @@ Node *primary() {
   return new_node_num(expect_number());
 }
 
-Node* variable(Token *tok) {
+Node *define_variable(Token *tok) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
 
   LVar *lvar = find_lvar(tok);
-  if (lvar) {
-    node->offset = lvar->offset;
-  } else {
-    lvar = calloc(1, sizeof(LVar));
-    lvar->next = locals[cur_func];
-    lvar->name = tok->str;
-    lvar->len = tok->len;
-    if (locals[cur_func] == NULL) {
-      lvar->offset = 8;
-    } else {
-      lvar->offset = locals[cur_func]->offset + 8;
-    }
-    node->offset = lvar->offset;
-    locals[cur_func] = lvar;
+  if (lvar != NULL) {
     char name[100] = {0};
     memcpy(name, tok->str, tok->len);
-    fprintf(stderr, "*NEW VARIABLE* %s\n", name);
+    error("redefined variable: %s", name);
   }
+  lvar = calloc(1, sizeof(LVar));
+  lvar->next = locals[cur_func];
+  lvar->name = tok->str;
+  lvar->len = tok->len;
+  if (locals[cur_func] == NULL) {
+    lvar->offset = 8;
+  } else {
+    lvar->offset = locals[cur_func]->offset + 8;
+  }
+  node->offset = lvar->offset;
+  locals[cur_func] = lvar;
+  return node;
+}
+
+Node *variable(Token *tok) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_LVAR;
+
+  LVar *lvar = find_lvar(tok);
+  if (lvar == NULL) {
+    char name[100] = {0};
+    memcpy(name, tok->str, tok->len);
+    error("undefined variable: %s", name);
+  }
+  node->offset = lvar->offset;
   return node;
 }
 

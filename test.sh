@@ -20,6 +20,13 @@ assert() {
   fi
 }
 
+# int
+assert 2 "main() {
+  int x;
+  x = 2;
+  return 2;
+}"
+
 # compare calc tests
 assert 2 "main () { return 2;}"
 assert 2 "main () return 2;"
