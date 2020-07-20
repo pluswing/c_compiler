@@ -36,6 +36,10 @@ void program() {
 Node *func() {
   cur_func++;
   Node *node;
+  if (!consume_kind(TK_TYPE)) {
+    error("function retun type not found.");
+  }
+
   Token *tok = consume_kind(TK_IDENT);
   if (tok == NULL) {
     error("not function!");
@@ -48,9 +52,12 @@ Node *func() {
   expect("(");
 
   for (int i = 0; !consume(")"); i++) {
+    if (!consume_kind(TK_TYPE)) {
+      error("function args type not found.");
+    }
     Token *tok = consume_kind(TK_IDENT);
     if (tok != NULL) {
-      node->args[i] = variable(tok);
+      node->args[i] = define_variable(tok);
     }
     if (consume(")")) {
       break;

@@ -21,130 +21,163 @@ assert() {
 }
 
 # int
-assert 2 "main() {
+assert 2 "int main() {
   int x;
   x = 2;
   return 2;
 }"
+assert 6 "int main() {
+  int x;
+  x = 2;
+  return func(x, 4);
+}
+int func(int x, int y) {
+  return x + y;
+}"
 
 # compare calc tests
-assert 2 "main () { return 2;}"
-assert 2 "main () return 2;"
+assert 2 "int main () { return 2;}"
+assert 2 "int main () return 2;"
 assert 3 "
-main() return func(1, 2);
-func(a, b) { return a + b; }
+int main() return func(1, 2);
+int func(int a, int b) { return a + b; }
 "
 assert 4 "
-main() return func(1, 2, 3);
-func(a, b, c) { return a + c; }
+int main() return func(1, 2, 3);
+int func(int a, int b, int c) { return a + c; }
 "
 
-assert 55 "main () {
+assert 55 "int main () {
+  int a;
   a = 10;
   return sum(a);
 }
-sum(n) {
+int sum(int n) {
   if (n < 0) return 0;
   return n + sum(n - 1);
 }
 "
 
-assert 42 "main() return 42;"
-assert 21 "main() return 5+20-4;"
-assert 41 "main() return  12 + 34 - 5 ;"
-assert 47 "main() return 5+6*7;"
-assert 15 "main() return 5*(9-6);"
-assert 4 "main() return (3+5)/2;"
-assert 10 "main() return -10+20;"
-assert 10 "main() return - -10;"
-assert 10 "main() return - - +10;"
+assert 42 "int main() return 42;"
+assert 21 "int main() return 5+20-4;"
+assert 41 "int main() return  12 + 34 - 5 ;"
+assert 47 "int main() return 5+6*7;"
+assert 15 "int main() return 5*(9-6);"
+assert 4 "int main() return (3+5)/2;"
+assert 10 "int main() return -10+20;"
+assert 10 "int main() return - -10;"
+assert 10 "int main() return - - +10;"
 
 # compare tests(1)
-assert 0 "main() return 0==1;"
-assert 1 "main() return 42==42;"
-assert 1 "main() return 0!=1;"
-assert 0 "main() return 42!=42;"
+assert 0 "int main() return 0==1;"
+assert 1 "int main() return 42==42;"
+assert 1 "int main() return 0!=1;"
+assert 0 "int main() return 42!=42;"
 
 # compare tests(2)
-assert 1 "main() return 0<1;"
-assert 0 "main() return 1<1;"
-assert 0 "main() return 2<1;"
-assert 1 "main() return 0<=1;"
-assert 1 "main() return 1<=1;"
-assert 0 "main() return 2<=1;"
+assert 1 "int main() return 0<1;"
+assert 0 "int main() return 1<1;"
+assert 0 "int main() return 2<1;"
+assert 1 "int main() return 0<=1;"
+assert 1 "int main() return 1<=1;"
+assert 0 "int main() return 2<=1;"
 
 # compare tests(3)
-assert 1 "main() return 1>0;"
-assert 0 "main() return 1>1;"
-assert 0 "main() return 1>2;"
-assert 1 "main() return 1>=0;"
-assert 1 "main() return 1>=1;"
-assert 0 "main() return 1>=2;"
+assert 1 "int main() return 1>0;"
+assert 0 "int main() return 1>1;"
+assert 0 "int main() return 1>2;"
+assert 1 "int main() return 1>=0;"
+assert 1 "int main() return 1>=1;"
+assert 0 "int main() return 1>=2;"
 
 # variable tests
-assert 14 "main() {a = 3;
+assert 14 "int main() {
+int a;
+int b;
+a = 3;
 b = 5 * 6 - 8;
 a + b / 2;
 }"
-assert 6 "main() {foo = 1;
+assert 6 "int main() {
+int foo;
+int bar;
+foo = 1;
 bar = 2 + 3;
 foo + bar;
 }"
 
 # return tests
-assert 14 "main() {a = 3;
+assert 14 "int main() {
+int a;
+int b;
+a = 3;
 b = 5 * 6 - 8;
 return a + b / 2;
 }"
-assert 5 "main() {return 5;
+assert 5 "int main() {return 5;
 return 8;
 }"
 
 # IF tests
-assert 3 "main() {a = 3;
+assert 3 "int main() {
+int a;
+a = 3;
 if (a == 3) return a;
 return 5;
 }
 "
-assert 5 "main() {if (3 != 3) return 1;
+assert 5 "int main() {if (3 != 3) return 1;
 return 5;
 }
 "
-assert 5 "main() {if (3 != 3) return 1;
+assert 5 "int main() {if (3 != 3) return 1;
 else return 5;
 return 2;
 }
 "
 
 # while
-assert 11 "main() { i = 0;
+assert 11 "int main() {
+int i;
+i = 0;
 while (i <= 10) i = i + 1;
 return i;
 }"
 
 # for
-assert 30 "main() {a = 0;
+assert 30 "int main() {
+int a;
+int i;
+a = 0;
 for (i = 0; i < 10; i = i + 1) a = a + 2;
 return i + a;
 }"
-assert 10 "main() {a = 0;
+assert 10 "int main() {
+int a;
+a = 0;
 for (;a < 10;) a = a + 1;
 return a;
 }"
 
 # multi contorl syntax
-assert 6 "main() {a = 3;
+assert 6 "int main() {
+int a;
+a = 3;
 if (a == 1) return 4;
 if (a == 2) return 5;
 if (a == 3) return 6;
 }"
-assert 10 "main() {a = 0;
+assert 10 "int main() {
+int a;
+a = 0;
 for(;;a = a + 1) if (a == 5) return 10;
 return 2;
 }"
 
 # block
-assert 10 "main() {a = 0;
+assert 10 "int main() {
+int a;
+a = 0;
 for(;;) {
   a = a + 1;
   if (a == 5) return 10;
@@ -153,17 +186,22 @@ return 2;
 }"
 
 # func
-assert 1 "main() return foo();"
-assert 7 "main() return bar(3, 4);"
-assert 12 "main() return bar2(3, 4, 5);"
+assert 1 "int main() return foo();"
+assert 7 "int main() return bar(3, 4);"
+assert 12 "int main() return bar2(3, 4, 5);"
 
 # &, *
-assert 3 "main() {
+assert 3 "int main() {
+  int x;
+  int y;
   x = 3;
   y = &x;
   return *y;
 }"
-assert 3 "main() {
+assert 3 "int main() {
+  int x;
+  int y;
+  int z;
   x = 3;
   y = 5;
   z = &y + 8;
