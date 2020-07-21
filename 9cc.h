@@ -29,6 +29,13 @@ struct Token {
   int len;
 };
 
+typedef struct Type Type;
+
+struct Type {
+  enum { INT, PTR } ty;
+  struct Type *ptr_to;
+};
+
 typedef struct LVar LVar;
 
 struct LVar {
@@ -36,6 +43,7 @@ struct LVar {
   char *name;
   int len;
   int offset;
+  Type *type;
 };
 
 extern Token *token;
@@ -112,7 +120,7 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
-Node *define_variable(Token *tok);
+Node *define_variable();
 Node *variable(Token *tok);
 
 void gen_lval(Node *node);
