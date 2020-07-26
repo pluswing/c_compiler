@@ -101,6 +101,7 @@ struct Node {
   Node **args; // only kind == ND_FUNC_DEF
   int val;    // only kind == ND_NUM
   int offset; // only kind == ND_LVAR
+  Type *type; // only kind == ND_LVAR
 };
 
 extern Node *code[];
