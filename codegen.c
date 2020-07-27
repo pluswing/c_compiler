@@ -246,7 +246,8 @@ Node *mul() {
   }
 }
 
-// unary = "+"? primary
+// unary = "sizeof" unary
+//       | "+"? primary
 //       | "-"? primary
 //       | "*" unary
 //       | "&" unary
@@ -262,6 +263,11 @@ Node *unary() {
   }
   if (consume("&")) {
     return new_binary(ND_ADDR, unary(), NULL);
+  }
+  if (consume_kind(TK_SIZEOF)) {
+    Node *n = unary();
+    int size = n->type && n->type->ty == PTR ? 8 : 4;
+    return new_node_num(size);
   }
   return primary();
 }
