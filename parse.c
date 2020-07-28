@@ -127,7 +127,7 @@ Token *tokenize() {
       p += 2;
       continue;
     }
-    if (strchr("+-*/()<>=;{},&", *p)) {
+    if (strchr("+-*/()<>=;{},&[]", *p)) {
       cur = new_token(TK_RESRVED, cur, p++, 1);
       continue;
     }

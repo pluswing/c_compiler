@@ -266,6 +266,9 @@ Node *unary() {
   }
   if (consume_kind(TK_SIZEOF)) {
     Node *n = unary();
+    // TODO nから木をたどって変数を探す。
+    // *(デリファレンス)があれば、変数を1段階でリファレンスした結果を返す
+    // 必要あり。
     int size = n->type && n->type->ty == PTR ? 8 : 4;
     return new_node_num(size);
   }
@@ -325,6 +328,13 @@ Node *define_variable() {
   Token *tok = consume_kind(TK_IDENT);
   if (tok == NULL) {
     error("invalid define variable");
+  }
+
+  // 配列かチェック
+  if (consume("[")) {
+    type->ty = ARRAY;
+    type->array_size = expect_number();
+    expect("]");
   }
 
   Node *node = calloc(1, sizeof(Node));
@@ -412,7 +422,12 @@ void gen(Node *node) {
     }
     // 引数の数を除いた変数の数分rspをずらして、変数領域を確保する。
     if (locals[cur_func]) {
-      int offset = locals[cur_func][0].offset;
+      int offset = 0;
+      for(LVar *cur = locals[cur_func]; cur; cur = cur->next) {
+        // TODO intの配列しか想定してない。
+        // TODO 足すのは(int)4か8(ptr)。このチェックを行う必要あり。
+        offset += cur->type->ty == ARRAY ? cur->type->array_size * 4 : 8;
+      }
       offset -= argCount * 8;
       printf("  sub rsp, %d\n", offset);
     }
