@@ -330,11 +330,23 @@ Node *define_variable() {
     error("invalid define variable");
   }
 
+  int size = type->ty == PTR ? 8 : 4;
+
   // 配列かチェック
-  if (consume("[")) {
-    type->ty = ARRAY;
-    type->array_size = expect_number();
+  while (consume("[")) {
+    Type *t;
+    t = calloc(1, sizeof(Type));
+    t->ty = ARRAY;
+    t->ptr_to = type;
+    t->array_size = expect_number();
+    type = t;
+    size *= t->array_size;
     expect("]");
+  }
+
+  // TODO 要確認 変数のoffset値は8の倍数じゃないとダメっぽい。
+  while((size % 8) != 0) {
+    size += 4;
   }
 
   Node *node = calloc(1, sizeof(Node));
@@ -351,9 +363,9 @@ Node *define_variable() {
   lvar->name = tok->str;
   lvar->len = tok->len;
   if (locals[cur_func] == NULL) {
-    lvar->offset = 8;
+    lvar->offset = size;
   } else {
-    lvar->offset = locals[cur_func]->offset + 8;
+    lvar->offset = locals[cur_func]->offset + size;
   }
   lvar->type = type;
   node->offset = lvar->offset;
@@ -422,12 +434,7 @@ void gen(Node *node) {
     }
     // 引数の数を除いた変数の数分rspをずらして、変数領域を確保する。
     if (locals[cur_func]) {
-      int offset = 0;
-      for(LVar *cur = locals[cur_func]; cur; cur = cur->next) {
-        // TODO intの配列しか想定してない。
-        // TODO 足すのは(int)4か8(ptr)。このチェックを行う必要あり。
-        offset += cur->type->ty == ARRAY ? cur->type->array_size * 4 : 8;
-      }
+      int offset = locals[cur_func][0].offset;
       offset -= argCount * 8;
       printf("  sub rsp, %d\n", offset);
     }
