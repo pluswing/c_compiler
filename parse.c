@@ -1,185 +1,391 @@
 #include "9cc.h"
 
-Token *token;
-char *user_input;
-LVar *locals[100];
-int cur_func = 0;
-
-void error(char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  fprintf(stderr, "\n");
-  exit(1);
+Node *new_node(NodeKind kind) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = kind;
+  return node;
 }
 
-void error_at(char *loc, char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-
-  int pos = loc - user_input;
-  fprintf(stderr, "%s\n", user_input);
-  fprintf(stderr, "%*s", pos, "");
-  fprintf(stderr, "^ ");
-  vfprintf(stderr, fmt, ap);
-  fprintf(stderr, "\n");
-  exit(1);
+Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
+  Node *node = new_node(kind);
+  node->lhs = lhs;
+  node->rhs = rhs;
+  return node;
 }
 
-bool consume(char *op) {
-  if (token->kind != TK_RESRVED ||
-      strlen(op) != token->len ||
-      memcmp(token->str, op, token->len)) {
+Node *new_node_num(int val) {
+  Node *node = new_node(ND_NUM);
+  node->val = val;
+  return node;
+}
 
-    return false;
+// TODO 100
+Node *code[100];
+
+
+// program    = func*
+void program() {
+  int i = 0;
+  while(!at_eof()) {
+    code[i++] = func();
   }
-  token = token->next;
-  return true;
+  code[i] = NULL;
 }
 
-Token* consume_kind(TokenKind kind) {
-  if (token->kind != kind) {
-    return NULL;
+// func = "int" ident "(" ("int" ident ("," "int" ident)*)? ")" stmt
+Node *func() {
+  cur_func++;
+  Node *node;
+  if (!consume_kind(TK_TYPE)) {
+    error("function retun type not found.");
   }
-  Token* tok = token;
-  token = token->next;
-  return tok;
-}
 
-void expect(char *op) {
-  if (token->kind != TK_RESRVED ||
-      strlen(op) != token->len ||
-      memcmp(token->str, op, token->len)) {
-
-    error_at(token->str, "\"%s\"ではありません", op);
+  Token *tok = consume_kind(TK_IDENT);
+  if (tok == NULL) {
+    error("not function!");
   }
-  token = token->next;
-}
+  node = calloc(1, sizeof(Node));
+  node->kind = ND_FUNC_DEF;
+  node->funcname = calloc(100, sizeof(char));
+  node->args = calloc(10, sizeof(Node*));
+  memcpy(node->funcname, tok->str, tok->len);
+  expect("(");
 
-int expect_number() {
-  if (token->kind != TK_NUM) {
-    error_at(token->str, "数字ではありません");
+  for (int i = 0; !consume(")"); i++) {
+    if (!consume_kind(TK_TYPE)) {
+      error("function args type not found.");
+    }
+    node->args[i] = define_variable();
+    if (consume(")")) {
+      break;
+    }
+    expect(",");
   }
-  int val = token->val;
-  token = token->next;
-  return val;
+  node->lhs = stmt();
+  return node;
 }
 
-bool at_eof() {
-  return token->kind == TK_EOF;
-}
+// stmt    = expr ";"
+//        | "{" stmt* "}"
+//        | "return" expr ";"
+//        | "if" "(" expr ")" stmt ("else" stmt)?
+//        | "while" "(" expr ")" stmt
+//        | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+//        | "int" "*"* ident ";"
+Node *stmt() {
+  Node *node;
+  if (consume("{")) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_BLOCK;
+    // TODO 100
+    node->block = calloc(100, sizeof(Node));
+    for(int i = 0; !consume("}"); i++) {
+      node->block[i] = stmt();
+    }
+    return node;
+  }
 
-Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
-  Token *tok = calloc(1, sizeof(Token));
-  tok->kind = kind;
-  tok->str = str;
-  tok->len = len;
-  cur->next = tok;
-  return tok;
-}
+  if (consume_kind(TK_FOR)) {
+    expect("(");
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_FOR;
 
-bool startswith(char *p, char *q) {
-  return memcmp(p, q, strlen(q)) == 0;
-}
+    Node *left = calloc(1, sizeof(Node));
+    left->kind = ND_FOR_LEFT;
+    Node *right = calloc(1, sizeof(Node));
+    right->kind = ND_FOR_RIGHT;
 
-int is_alnum(char c) {
-  return ('a' <= c && c <= 'z') ||
-         ('A' <= c && c <= 'Z') ||
-         ('0' <= c && c <= '9') ||
-         (c == '_');
-}
-
-typedef struct ReservedWord ReservedWord;
-struct ReservedWord {
-  char *word;
-  TokenKind kind;
-};
-
-ReservedWord reservedWords[] = {
-  {"return", TK_RETURN},
-  {"if", TK_IF},
-  {"else", TK_ELSE},
-  {"while", TK_WHILE},
-  {"for", TK_FOR},
-  {"int", TK_TYPE},
-  {"sizeof", TK_SIZEOF},
-  {"", TK_EOF},
-};
-
-Token *tokenize() {
-  char *p = user_input;
-  Token head;
-  head.next = NULL;
-  Token *cur = &head;
-
-  while (*p) {
-    if (isspace(*p)) {
-      p++;
-      continue;
+    if (!consume(";")) {
+      left->lhs = expr();
+      expect(";");
     }
 
-    if (startswith(p, "==") ||
-        startswith(p, "!=") ||
-        startswith(p, "<=") ||
-        startswith(p, ">=")) {
-
-      cur = new_token(TK_RESRVED, cur, p, 2);
-      p += 2;
-      continue;
-    }
-    if (strchr("+-*/()<>=;{},&[]", *p)) {
-      cur = new_token(TK_RESRVED, cur, p++, 1);
-      continue;
+    if (!consume(";")) {
+      left->rhs = expr();
+      expect(";");
     }
 
-    bool found = false;
-    for (int i = 0; reservedWords[i].kind != TK_EOF; i++) {
-      char *w = reservedWords[i].word;
-      int len = strlen(w);
-      TokenKind kind = reservedWords[i].kind;
-      if (startswith(p, w) && !is_alnum(p[len])) {
-        cur = new_token(kind, cur, p, len);
-        p += len;
-        found = true;
-        break;
+    if (!consume(")")) {
+      right->lhs = expr();
+      expect(")");
+    }
+    right->rhs = stmt();
+
+    node->lhs = left;
+    node->rhs = right;
+    return node;
+  }
+
+  if (consume_kind(TK_WHILE)) {
+    expect("(");
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_WHILE;
+    node->lhs = expr();
+    expect(")");
+    node->rhs = stmt();
+    return node;
+  }
+
+  if (consume_kind(TK_IF)) {
+    expect("(");
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_IF;
+    node->lhs = expr();
+    expect(")");
+    node->rhs = stmt();
+    if (consume_kind(TK_ELSE)) {
+      Node *els = calloc(1, sizeof(Node));
+      els->kind = ND_ELSE;
+      els->lhs = node->rhs;
+      els->rhs = stmt();
+      node->rhs = els;
+    }
+    return node;
+  }
+
+  if (consume_kind(TK_RETURN)) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_RETURN;
+    node->lhs = expr();
+    expect(";");
+    return node;
+  }
+
+  if (consume_kind(TK_TYPE)) {
+    node = define_variable();
+    expect(";");
+    return node;
+  }
+
+  node = expr();
+  expect(";");
+  return node;
+}
+
+// expr       = assign
+Node *expr() {
+  return assign();
+}
+
+// assign     = equality ("=" assign)?
+Node *assign() {
+  Node *node = equality();
+  if (consume("=")) {
+    node = new_binary(ND_ASSIGN, node, assign());
+  }
+  return node;
+}
+
+// equality   = relational ("==" relational | "!=" relational)*
+Node *equality() {
+  Node *node = relational();
+  for(;;) {
+    if (consume("==")) {
+      node = new_binary(ND_EQ, node, relational());
+    } else if (consume("!=")) {
+      node = new_binary(ND_NE, node, relational());
+    } else {
+      return node;
+    }
+  }
+}
+
+// relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+Node *relational() {
+  Node *node = add();
+  for (;;) {
+    if (consume("<")) {
+      node = new_binary(ND_LT, node, add());
+    } else if (consume("<=")) {
+      node = new_binary(ND_LE, node, add());
+    } else if (consume(">")) {
+      node = new_binary(ND_LT, add(), node);
+    } else if (consume(">=")) {
+      node = new_binary(ND_LE, add(), node);
+    } else {
+      return node;
+    }
+  }
+}
+
+// add        = mul ("+" mul | "-" mul)*
+Node *add() {
+  Node *node = mul();
+  for (;;) {
+    if (consume("+")) {
+      Node *r = mul();
+      if (node->type && node->type->ty == PTR) {
+        int n = node->type->ptr_to->ty == INT ? 4 : 8;
+        r = new_binary(ND_MUL, r, new_node_num(n));
       }
-    }
-    if (found) {
-      continue;
-    }
-
-    if ('a' <= *p && *p <= 'z') {
-      char *c = p;
-      while(is_alnum(*c)) {
-        c++;
+      node = new_binary(ND_ADD, node, r);
+    } else if (consume("-")) {
+      Node *r = mul();
+      if (node->type && node->type->ty == PTR) {
+        int n = node->type->ptr_to->ty == INT ? 4 : 8;
+        r = new_binary(ND_MUL, r, new_node_num(n));
       }
-      int len = c - p;
-      cur = new_token(TK_IDENT, cur, p, len);
-      p = c;
-      continue;
+      node = new_binary(ND_SUB, node, r);
+    } else {
+      return node;
     }
-
-    if (isdigit(*p)) {
-      cur = new_token(TK_NUM, cur, p, 1);
-      char *q = p;
-      cur->val = strtol(p, &p, 10);
-      cur->len = p - q;
-      continue;
-    }
-
-    error_at(p, "expected a number");
   }
-
-  new_token(TK_EOF, cur, p, 0);
-  return head.next;
 }
 
-LVar *find_lvar(Token *tok) {
-  for (LVar *var = locals[cur_func]; var; var = var->next) {
-    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) {
-
-      return var;
+// mul        = unary ("*" unary | "/" unary)*
+Node *mul() {
+  Node *node = unary();
+  for (;;) {
+    if (consume("*")) {
+      node = new_binary(ND_MUL, node, unary());
+    } else if (consume("/")) {
+      node = new_binary(ND_DIV, node, unary());
+    } else {
+      return node;
     }
   }
-  return NULL;
+}
+
+// unary = "sizeof" unary
+//       | "+"? primary
+//       | "-"? primary
+//       | "*" unary
+//       | "&" unary
+Node *unary() {
+  if (consume("+")) {
+    return unary();
+  }
+  if (consume("-")) {
+    return new_binary(ND_SUB, new_node_num(0), unary());
+  }
+  if (consume("*")) {
+    return new_binary(ND_DEREF, unary(), NULL);
+  }
+  if (consume("&")) {
+    return new_binary(ND_ADDR, unary(), NULL);
+  }
+  if (consume_kind(TK_SIZEOF)) {
+    Node *n = unary();
+    // TODO nから木をたどって変数を探す。
+    // *(デリファレンス)があれば、変数を1段階でリファレンスした結果を返す
+    // 必要あり。
+    int size = n->type && n->type->ty == PTR ? 8 : 4;
+    return new_node_num(size);
+  }
+  return primary();
+}
+
+// primary = num
+//        | ident ("(" expr* ")")?
+//        | "(" expr ")"
+Node *primary() {
+  if (consume("(")) {
+    Node *node = expr();
+    expect(")");
+    return node;
+  }
+
+  Token *tok = consume_kind(TK_IDENT);
+  if (tok) {
+    if (consume("(")) {
+      // 関数呼び出し
+      Node *node = calloc(1, sizeof(Node));
+      node->kind = ND_FUNC_CALL;
+      node->funcname = calloc(100, sizeof(char));
+      memcpy(node->funcname, tok->str, tok->len);
+      // 引数 TODO とりあえず10個まで。
+      node->block = calloc(10, sizeof(Node));
+      for(int i = 0; !consume(")"); i++) {
+        node->block[i] = expr();
+        if (consume(")")) {
+          break;
+        }
+        expect(",");
+      }
+      return node;
+    }
+    // 関数呼び出しではない場合、変数。
+    return variable(tok);
+  }
+
+  return new_node_num(expect_number());
+}
+
+Node *define_variable() {
+
+  Type *type;
+  type = calloc(1, sizeof(Type));
+  type->ty = INT;
+  type->ptr_to = NULL;
+  while(consume("*")) {
+    Type *t;
+    t = calloc(1, sizeof(Type));
+    t->ty = PTR;
+    t->ptr_to = type;
+    type = t;
+  }
+
+  Token *tok = consume_kind(TK_IDENT);
+  if (tok == NULL) {
+    error("invalid define variable");
+  }
+
+  int size = type->ty == PTR ? 8 : 4;
+
+  // 配列かチェック
+  while (consume("[")) {
+    Type *t;
+    t = calloc(1, sizeof(Type));
+    t->ty = ARRAY;
+    t->ptr_to = type;
+    t->array_size = expect_number();
+    type = t;
+    size *= t->array_size;
+    expect("]");
+  }
+
+  // TODO 要確認 変数のoffset値は8の倍数じゃないとダメっぽい。
+  while((size % 8) != 0) {
+    size += 4;
+  }
+
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_LVAR;
+
+  LVar *lvar = find_lvar(tok);
+  if (lvar != NULL) {
+    char name[100] = {0};
+    memcpy(name, tok->str, tok->len);
+    error("redefined variable: %s", name);
+  }
+  lvar = calloc(1, sizeof(LVar));
+  lvar->next = locals[cur_func];
+  lvar->name = tok->str;
+  lvar->len = tok->len;
+  if (locals[cur_func] == NULL) {
+    lvar->offset = size;
+  } else {
+    lvar->offset = locals[cur_func]->offset + size;
+  }
+  lvar->type = type;
+  node->offset = lvar->offset;
+  node->type = lvar->type;
+  locals[cur_func] = lvar;
+  return node;
+}
+
+
+Node *variable(Token *tok) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_LVAR;
+
+  LVar *lvar = find_lvar(tok);
+  if (lvar == NULL) {
+    char name[100] = {0};
+    memcpy(name, tok->str, tok->len);
+    error("undefined variable: %s", name);
+  }
+  node->offset = lvar->offset;
+  node->type = lvar->type;
+  return node;
 }
