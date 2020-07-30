@@ -125,6 +125,7 @@ Node *unary();
 Node *primary();
 Node *define_variable();
 Node *variable(Token *tok);
+Type *get_type(Node *node);
 
 void gen_lval(Node *node);
 void gen(Node *node);

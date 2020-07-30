@@ -266,13 +266,34 @@ Node *unary() {
   }
   if (consume_kind(TK_SIZEOF)) {
     Node *n = unary();
-    // TODO nから木をたどって変数を探す。
-    // *(デリファレンス)があれば、変数を1段階でリファレンスした結果を返す
-    // 必要あり。
-    int size = n->type && n->type->ty == PTR ? 8 : 4;
+    Type *t = get_type(n);
+    int size = t && t->ty == PTR ? 8 : 4;
     return new_node_num(size);
   }
   return primary();
+}
+
+Type *get_type(Node *node) {
+  if (node == NULL) {
+    return NULL;
+  }
+  if (node->type) {
+    return node->type;
+  }
+
+  Type *t = get_type(node->lhs);
+  if (t == NULL) {
+    t = get_type(node->rhs);
+  }
+
+  if (t && node->kind == ND_DEREF) {
+    t = t->ptr_to;
+    if (t == NULL) {
+      error("invalid dereference");
+    }
+    return t;
+  }
+  return t;
 }
 
 // primary = num

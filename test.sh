@@ -35,6 +35,10 @@ assert 8 "int main() {
   int *x;
   return sizeof(x);
 }"
+assert 8 "int main() {
+  int *x;
+  return sizeof(x + 3);
+}"
 assert 4 "int main() {
   int *x;
   return sizeof(*x);
@@ -42,11 +46,6 @@ assert 4 "int main() {
 assert 4 "int main() {
   return sizeof(1);
 }"
-# TODO x + 3を解釈するために木をトラバースする必要あり。
-# assert 8 "int main() {
-#   int *x;
-#   return sizeof(x + 3);
-# }"
 
 #pointer +/-
 assert 4 "int main() {
