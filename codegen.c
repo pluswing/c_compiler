@@ -141,6 +141,10 @@ void gen(Node *node) {
     return;
   case ND_LVAR:
     gen_lval(node);
+    Type *t = get_type(node);
+    if (t && t->ty == ARRAY) {
+      return;
+    }
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");

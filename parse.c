@@ -214,14 +214,14 @@ Node *add() {
   for (;;) {
     if (consume("+")) {
       Node *r = mul();
-      if (node->type && node->type->ty == PTR) {
+      if (node->type && node->type->ty != INT) {
         int n = node->type->ptr_to->ty == INT ? 4 : 8;
         r = new_binary(ND_MUL, r, new_node_num(n));
       }
       node = new_binary(ND_ADD, node, r);
     } else if (consume("-")) {
       Node *r = mul();
-      if (node->type && node->type->ty == PTR) {
+      if (node->type && node->type->ty != INT) {
         int n = node->type->ptr_to->ty == INT ? 4 : 8;
         r = new_binary(ND_MUL, r, new_node_num(n));
       }
