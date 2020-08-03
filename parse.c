@@ -396,6 +396,7 @@ Node *define_variable() {
 }
 
 
+// a[3] は *(a + 3)
 Node *variable(Token *tok) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
@@ -408,5 +409,16 @@ Node *variable(Token *tok) {
   }
   node->offset = lvar->offset;
   node->type = lvar->type;
+
+  while (consume("[")) {
+    Node *add = calloc(1, sizeof(Node));
+    add->kind = ND_ADD;
+    add->lhs = node;
+    add->rhs = expr();
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_DEREF;
+    node->lhs = add;
+    expect("]");
+  }
   return node;
 }

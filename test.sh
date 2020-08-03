@@ -20,6 +20,17 @@ assert() {
   fi
 }
 
+# array access
+# FIXME 2重配列はNGだった。
+assert 3 "int main() {
+  int a[2];
+  a[0] = 1;
+  a[1] = 2;
+  int *p;
+  p = a;
+  return p[0] + p[1];
+}"
+
 # array pointer
 assert 3 "int main() {
   int a[2];

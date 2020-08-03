@@ -45,7 +45,7 @@ void gen(Node *node) {
     }
     // 引数の数を除いた変数の数分rspをずらして、変数領域を確保する。
     if (locals[cur_func]) {
-      int offset = locals[cur_func][0].offset;
+      int offset = locals[cur_func]->offset;
       offset -= argCount * 8;
       printf("  sub rsp, %d\n", offset);
     }
