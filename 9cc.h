@@ -48,6 +48,12 @@ struct LVar {
   Type *type;
 };
 
+typedef struct Define Define;
+struct Define {
+  Type *type;
+  Token *ident;
+};
+
 extern Token *token;
 extern char *user_input;
 extern LVar *locals[];
@@ -126,6 +132,7 @@ Node *primary();
 Node *define_variable();
 Node *variable(Token *tok);
 Type *get_type(Node *node);
+Define *read_define();
 
 void gen_lval(Node *node);
 void gen(Node *node);

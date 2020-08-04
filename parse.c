@@ -36,33 +36,57 @@ void program() {
 Node *func() {
   cur_func++;
   Node *node;
+
+  Define *def = read_define();
+
+  if (consume("(")) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_FUNC_DEF;
+    node->funcname = calloc(100, sizeof(char));
+    node->args = calloc(10, sizeof(Node*));
+    memcpy(node->funcname, def->ident->str, def->ident->len);
+
+    for (int i = 0; !consume(")"); i++) {
+      node->args[i] = define_variable(read_define());
+      if (consume(")")) {
+        break;
+      }
+      expect(",");
+    }
+    node->lhs = stmt();
+    return node;
+  } else {
+    // 変数定義
+    return define_variable(def); // TODO グローバル変数の登録
+  }
+}
+
+// 関数か変数の定義の前半部分を読んで、LVarに詰める
+Define *read_define() {
   if (!consume_kind(TK_TYPE)) {
-    error("function retun type not found.");
+    return NULL;
+  }
+
+  Type *type = calloc(1, sizeof(Type));
+  type->ty = INT;
+  type->ptr_to = NULL;
+  while(consume("*")) {
+    Type *t;
+    t = calloc(1, sizeof(Type));
+    t->ty = PTR;
+    t->ptr_to = type;
+    type = t;
   }
 
   Token *tok = consume_kind(TK_IDENT);
   if (tok == NULL) {
-    error("not function!");
+    error("invalid define function or variable");
   }
-  node = calloc(1, sizeof(Node));
-  node->kind = ND_FUNC_DEF;
-  node->funcname = calloc(100, sizeof(char));
-  node->args = calloc(10, sizeof(Node*));
-  memcpy(node->funcname, tok->str, tok->len);
-  expect("(");
 
-  for (int i = 0; !consume(")"); i++) {
-    if (!consume_kind(TK_TYPE)) {
-      error("function args type not found.");
-    }
-    node->args[i] = define_variable();
-    if (consume(")")) {
-      break;
-    }
-    expect(",");
-  }
-  node->lhs = stmt();
-  return node;
+  Define *def = calloc(1, sizeof(Define));
+  def->type = type;
+  def->ident = tok;
+  return def;
 }
 
 // stmt    = expr ";"
@@ -151,8 +175,9 @@ Node *stmt() {
     return node;
   }
 
-  if (consume_kind(TK_TYPE)) {
-    node = define_variable();
+  Define *def = read_define();
+  if (def) {
+    node = define_variable(def);
     expect(";");
     return node;
   }
@@ -332,24 +357,11 @@ Node *primary() {
   return new_node_num(expect_number());
 }
 
-Node *define_variable() {
-
-  Type *type;
-  type = calloc(1, sizeof(Type));
-  type->ty = INT;
-  type->ptr_to = NULL;
-  while(consume("*")) {
-    Type *t;
-    t = calloc(1, sizeof(Type));
-    t->ty = PTR;
-    t->ptr_to = type;
-    type = t;
+Node *define_variable(Define *def) {
+  if (def == NULL) {
+    error("invalid define");
   }
-
-  Token *tok = consume_kind(TK_IDENT);
-  if (tok == NULL) {
-    error("invalid define variable");
-  }
+  Type *type = def->type;
 
   int size = type->ty == PTR ? 8 : 4;
 
@@ -373,16 +385,16 @@ Node *define_variable() {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
 
-  LVar *lvar = find_lvar(tok);
+  LVar *lvar = find_lvar(def->ident);
   if (lvar != NULL) {
     char name[100] = {0};
-    memcpy(name, tok->str, tok->len);
+    memcpy(name, def->ident->str, def->ident->len);
     error("redefined variable: %s", name);
   }
   lvar = calloc(1, sizeof(LVar));
   lvar->next = locals[cur_func];
-  lvar->name = tok->str;
-  lvar->len = tok->len;
+  lvar->name = def->ident->str;
+  lvar->len = def->ident->len;
   if (locals[cur_func] == NULL) {
     lvar->offset = size;
   } else {
