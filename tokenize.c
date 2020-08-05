@@ -3,6 +3,7 @@
 Token *token;
 char *user_input;
 LVar *locals[100];
+LVar *globals[100];
 int cur_func = 0;
 
 void error(char *fmt, ...) {

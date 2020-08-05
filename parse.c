@@ -47,7 +47,7 @@ Node *func() {
     memcpy(node->funcname, def->ident->str, def->ident->len);
 
     for (int i = 0; !consume(")"); i++) {
-      node->args[i] = define_variable(read_define());
+      node->args[i] = define_variable(read_define(), locals);
       if (consume(")")) {
         break;
       }
@@ -57,7 +57,10 @@ Node *func() {
     return node;
   } else {
     // 変数定義
-    return define_variable(def); // TODO グローバル変数の登録
+    node = define_variable(def, globals);
+    node->kind = ND_GVAR;
+    expect(";");
+    return node;
   }
 }
 
@@ -177,7 +180,7 @@ Node *stmt() {
 
   Define *def = read_define();
   if (def) {
-    node = define_variable(def);
+    node = define_variable(def, locals);
     expect(";");
     return node;
   }
@@ -357,7 +360,7 @@ Node *primary() {
   return new_node_num(expect_number());
 }
 
-Node *define_variable(Define *def) {
+Node *define_variable(Define *def, LVar **varlist) {
   if (def == NULL) {
     error("invalid define");
   }
@@ -383,27 +386,28 @@ Node *define_variable(Define *def) {
   }
 
   Node *node = calloc(1, sizeof(Node));
+  node->varname = calloc(100, sizeof(char));
+  memcpy(node->varname, def->ident->str, def->ident->len);
   node->kind = ND_LVAR;
+  node->size = size;
 
   LVar *lvar = find_lvar(def->ident);
   if (lvar != NULL) {
-    char name[100] = {0};
-    memcpy(name, def->ident->str, def->ident->len);
-    error("redefined variable: %s", name);
+    error("redefined variable: %s", node->varname);
   }
   lvar = calloc(1, sizeof(LVar));
-  lvar->next = locals[cur_func];
+  lvar->next = varlist[cur_func];
   lvar->name = def->ident->str;
   lvar->len = def->ident->len;
-  if (locals[cur_func] == NULL) {
+  if (varlist[cur_func] == NULL) {
     lvar->offset = size;
   } else {
-    lvar->offset = locals[cur_func]->offset + size;
+    lvar->offset = varlist[cur_func]->offset + size;
   }
   lvar->type = type;
   node->offset = lvar->offset;
   node->type = lvar->type;
-  locals[cur_func] = lvar;
+  varlist[cur_func] = lvar;
   return node;
 }
 

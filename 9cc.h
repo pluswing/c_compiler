@@ -57,6 +57,7 @@ struct Define {
 extern Token *token;
 extern char *user_input;
 extern LVar *locals[];
+extern LVar *globals[];
 extern int cur_func;
 
 void error(char *fmt, ...);
@@ -95,6 +96,7 @@ typedef enum {
   ND_FUNC_DEF, // 関数定義
   ND_ADDR, // &
   ND_DEREF, // *
+  ND_GVAR, // グローバル変数
   ND_NUM,
 } NodeKind;
 
@@ -110,6 +112,8 @@ struct Node {
   int val;    // only kind == ND_NUM
   int offset; // only kind == ND_LVAR
   Type *type; // only kind == ND_LVAR
+  char *varname; // only kind == ND_*VAR
+  int size;      // only kind == ND_*VAR
 };
 
 extern Node *code[];
