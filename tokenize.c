@@ -2,9 +2,6 @@
 
 Token *token;
 char *user_input;
-LVar *locals[100];
-LVar *globals[100];
-int cur_func = 0;
 
 void error(char *fmt, ...) {
   va_list ap;
@@ -175,12 +172,3 @@ Token *tokenize() {
   return head.next;
 }
 
-LVar *find_lvar(Token *tok) {
-  for (LVar *var = locals[cur_func]; var; var = var->next) {
-    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) {
-
-      return var;
-    }
-  }
-  return NULL;
-}

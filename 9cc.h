@@ -46,6 +46,7 @@ struct LVar {
   int len;
   int offset;
   Type *type;
+  enum { LOCAL, GLOBAL } kind;
 };
 
 typedef struct Define Define;
@@ -70,7 +71,6 @@ bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 bool startswith(char *p, char *q);
 Token *tokenize();
-LVar *find_lvar(Token *tok);
 
 // codegen
 typedef enum {
@@ -96,7 +96,8 @@ typedef enum {
   ND_FUNC_DEF, // 関数定義
   ND_ADDR, // &
   ND_DEREF, // *
-  ND_GVAR, // グローバル変数
+  ND_GVAR_DEF, // グローバル変数の定義
+  ND_GVAR, // グローバル変数の使用
   ND_NUM,
 } NodeKind;
 
@@ -137,6 +138,7 @@ Node *define_variable();
 Node *variable(Token *tok);
 Type *get_type(Node *node);
 Define *read_define();
+LVar *find_variable(Token *tok);
 
 void gen_lval(Node *node);
 void gen(Node *node);

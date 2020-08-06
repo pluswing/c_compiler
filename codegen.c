@@ -14,6 +14,10 @@ void gen_lval(Node *node) {
   printf("  push rax\n");
 }
 
+void gen_gval(Node *node) {
+  // TODO
+}
+
 int genCounter = 0;
 char *argRegs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
@@ -24,7 +28,7 @@ void gen(Node *node) {
   int argCount = 0;
 
   switch (node->kind) {
-  case ND_GVAR:
+  case ND_GVAR_DEF:
     printf("%s:\n", node->varname);
     printf("  .zero %d\n", node->size);
     return;
@@ -145,6 +149,16 @@ void gen(Node *node) {
     return;
   case ND_LVAR:
     gen_lval(node);
+    Type *t = get_type(node);
+    if (t && t->ty == ARRAY) {
+      return;
+    }
+    printf("  pop rax\n");
+    printf("  mov rax, [rax]\n");
+    printf("  push rax\n");
+    return;
+  case ND_GVAR:
+    gen_gval(node);
     Type *t = get_type(node);
     if (t && t->ty == ARRAY) {
       return;

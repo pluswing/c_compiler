@@ -1,5 +1,9 @@
 #include "9cc.h"
 
+LVar *locals[100];
+LVar *globals[100];
+int cur_func = 0;
+
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
@@ -34,12 +38,12 @@ void program() {
 
 // func = "int" ident "(" ("int" ident ("," "int" ident)*)? ")" stmt
 Node *func() {
-  cur_func++;
   Node *node;
 
   Define *def = read_define();
 
   if (consume("(")) {
+    cur_func++;
     node = calloc(1, sizeof(Node));
     node->kind = ND_FUNC_DEF;
     node->funcname = calloc(100, sizeof(char));
@@ -58,7 +62,7 @@ Node *func() {
   } else {
     // 変数定義
     node = define_variable(def, globals);
-    node->kind = ND_GVAR;
+    node->kind = ND_GVAR_DEF;
     expect(";");
     return node;
   }
@@ -388,13 +392,13 @@ Node *define_variable(Define *def, LVar **varlist) {
   Node *node = calloc(1, sizeof(Node));
   node->varname = calloc(100, sizeof(char));
   memcpy(node->varname, def->ident->str, def->ident->len);
-  node->kind = ND_LVAR;
   node->size = size;
 
-  LVar *lvar = find_lvar(def->ident);
+  LVar *lvar = find_variable(def->ident);
   if (lvar != NULL) {
     error("redefined variable: %s", node->varname);
   }
+  node->kind = lvar->kind == LOCAL ? ND_LVAR : ND_GVAR;
   lvar = calloc(1, sizeof(LVar));
   lvar->next = varlist[cur_func];
   lvar->name = def->ident->str;
@@ -417,7 +421,7 @@ Node *variable(Token *tok) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
 
-  LVar *lvar = find_lvar(tok);
+  LVar *lvar = find_variable(tok);
   if (lvar == NULL) {
     char name[100] = {0};
     memcpy(name, tok->str, tok->len);
@@ -437,4 +441,21 @@ Node *variable(Token *tok) {
     expect("]");
   }
   return node;
+}
+
+
+LVar *find_variable(Token *tok) {
+  for (LVar *var = locals[cur_func]; var; var = var->next) {
+    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) {
+      var->kind = LOCAL;
+      return var;
+    }
+  }
+  for (LVar *var = globals[0]; var; var = var->next) {
+    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) {
+      var->kind = GLOBAL;
+      return var;
+    }
+  }
+  return NULL;
 }

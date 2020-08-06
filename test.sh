@@ -25,9 +25,12 @@ assert 1 "
 int a;
 int b[10];
 int main() {
-  return 1;
+  a = 10;
+  return a;
 }
 "
+
+exit;
 
 # array access
 # FIXME 2重配列はNGだった。
