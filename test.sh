@@ -8,7 +8,7 @@ assert() {
   cd func
   cc -c func.c
   cd ..
-  cc -o tmp tmp.s func/func.o
+  cc -static -o tmp tmp.s func/func.o
   ./tmp
   actual="$?"
 
@@ -21,7 +21,7 @@ assert() {
 }
 
 # global variables
-assert 1 "
+assert 10 "
 int a;
 int b[10];
 int main() {

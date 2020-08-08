@@ -398,7 +398,8 @@ Node *define_variable(Define *def, LVar **varlist) {
   if (lvar != NULL) {
     error("redefined variable: %s", node->varname);
   }
-  node->kind = lvar->kind == LOCAL ? ND_LVAR : ND_GVAR;
+  // TODO あとでなおす
+  node->kind = locals == varlist ? ND_LVAR : ND_GVAR;
   lvar = calloc(1, sizeof(LVar));
   lvar->next = varlist[cur_func];
   lvar->name = def->ident->str;
@@ -419,14 +420,14 @@ Node *define_variable(Define *def, LVar **varlist) {
 // a[3] は *(a + 3)
 Node *variable(Token *tok) {
   Node *node = calloc(1, sizeof(Node));
-  node->kind = ND_LVAR;
+  node->varname = calloc(100, sizeof(char));
+  memcpy(node->varname, tok->str, tok->len);
 
   LVar *lvar = find_variable(tok);
   if (lvar == NULL) {
-    char name[100] = {0};
-    memcpy(name, tok->str, tok->len);
-    error("undefined variable: %s", name);
+    error("undefined variable: %s", node->varname);
   }
+  node->kind = lvar->kind == LOCAL ? ND_LVAR : ND_GVAR;
   node->offset = lvar->offset;
   node->type = lvar->type;
 

@@ -140,5 +140,5 @@ Type *get_type(Node *node);
 Define *read_define();
 LVar *find_variable(Token *tok);
 
-void gen_lval(Node *node);
+void gen_val(Node *node);
 void gen(Node *node);

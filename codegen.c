@@ -1,21 +1,20 @@
 #include "9cc.h"
 
-void gen_lval(Node *node) {
+void gen_val(Node *node) {
   if (node->kind == ND_DEREF) {
     gen(node->lhs);
     return;
   }
-  if (node->kind != ND_LVAR) {
-    error("not ND_LVAR");
+
+  if (node->kind == ND_LVAR) {
+    printf("  mov rax, rbp\n");
+    printf("  sub rax, %d\n", node->offset);
+    printf("  push rax\n");
+  } else if (node->kind == ND_GVAR) {
+    printf("  push offset %s\n", node->varname);
+  } else {
+    error("not VARIABLE");
   }
-
-  printf("  mov rax, rbp\n");
-  printf("  sub rax, %d\n", node->offset);
-  printf("  push rax\n");
-}
-
-void gen_gval(Node *node) {
-  // TODO
 }
 
 int genCounter = 0;
@@ -26,6 +25,7 @@ void gen(Node *node) {
   genCounter += 1;
   int id = genCounter;
   int argCount = 0;
+  Type *t;
 
   switch (node->kind) {
   case ND_GVAR_DEF:
@@ -33,7 +33,7 @@ void gen(Node *node) {
     printf("  .zero %d\n", node->size);
     return;
   case ND_ADDR:
-    gen_lval(node->lhs);
+    gen_val(node->lhs);
     return;
   case ND_DEREF:
     gen(node->lhs);
@@ -148,18 +148,9 @@ void gen(Node *node) {
     printf("  push %d\n", node->val);
     return;
   case ND_LVAR:
-    gen_lval(node);
-    Type *t = get_type(node);
-    if (t && t->ty == ARRAY) {
-      return;
-    }
-    printf("  pop rax\n");
-    printf("  mov rax, [rax]\n");
-    printf("  push rax\n");
-    return;
   case ND_GVAR:
-    gen_gval(node);
-    Type *t = get_type(node);
+    gen_val(node);
+    t = get_type(node);
     if (t && t->ty == ARRAY) {
       return;
     }
@@ -168,7 +159,7 @@ void gen(Node *node) {
     printf("  push rax\n");
     return;
   case ND_ASSIGN:
-    gen_lval(node->lhs);
+    gen_val(node->lhs);
     gen(node->rhs);
 
     printf("  pop rdi\n");
