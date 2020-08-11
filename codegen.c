@@ -42,6 +42,7 @@ void gen(Node *node) {
     printf("  push rax\n");
     return;
   case ND_FUNC_DEF:
+    printf(".global %s\n", node->funcname);
     printf("%s:\n", node->funcname);
     // プロローグ
     printf("  push rbp\n");

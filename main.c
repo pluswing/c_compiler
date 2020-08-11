@@ -11,16 +11,20 @@ int main(int argc, char **argv) {
   program();
 
   printf(".intel_syntax noprefix\n");
-  printf(".globl main\n");
   printf(".bss\n");
+  for (int i = 0; code[i]; i++) {
+    if (code[i]->kind == ND_GVAR_DEF) {
+      gen(code[i]);
+    }
+  }
 
+  printf(".text\n");
   cur_func = 0;
   for (int i = 0; code[i]; i++) {
-    cur_func++;
-    if (cur_func == 3) {
-      printf(".text\n");
+    if (code[i]->kind == ND_FUNC_DEF) {
+      cur_func++;
+      gen(code[i]);
     }
-    gen(code[i]);
   }
 
   return 0;

@@ -30,8 +30,6 @@ int main() {
 }
 "
 
-exit;
-
 # array access
 # FIXME 2重配列はNGだった。
 assert 3 "int main() {
