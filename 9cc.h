@@ -33,7 +33,7 @@ struct Token {
 typedef struct Type Type;
 
 struct Type {
-  enum { INT, PTR, ARRAY } ty;
+  enum { INT, PTR, ARRAY, CHAR } ty;
   struct Type *ptr_to;
   size_t array_size;
 };

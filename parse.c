@@ -70,12 +70,14 @@ Node *func() {
 
 // 関数か変数の定義の前半部分を読んで、LVarに詰める
 Define *read_define() {
-  if (!consume_kind(TK_TYPE)) {
+  Token *typeToken = consume_kind(TK_TYPE);
+  if (!typeToken) {
     return NULL;
   }
 
   Type *type = calloc(1, sizeof(Type));
-  type->ty = INT;
+  int isChar = memcmp("char", typeToken->str, typeToken->len) == 0;
+  type->ty = isChar ? CHAR : INT;
   type->ptr_to = NULL;
   while(consume("*")) {
     Type *t;
@@ -247,14 +249,16 @@ Node *add() {
     if (consume("+")) {
       Node *r = mul();
       if (node->type && node->type->ty != INT) {
-        int n = node->type->ptr_to->ty == INT ? 4 : 8;
+        int n = node->type->ptr_to->ty == INT ? 4
+              : node->type->ptr_to->ty == CHAR ? 1 : 8;
         r = new_binary(ND_MUL, r, new_node_num(n));
       }
       node = new_binary(ND_ADD, node, r);
     } else if (consume("-")) {
       Node *r = mul();
       if (node->type && node->type->ty != INT) {
-        int n = node->type->ptr_to->ty == INT ? 4 : 8;
+        int n = node->type->ptr_to->ty == INT ? 4
+              : node->type->ptr_to->ty == CHAR ? 1 : 8;
         r = new_binary(ND_MUL, r, new_node_num(n));
       }
       node = new_binary(ND_SUB, node, r);
@@ -299,7 +303,8 @@ Node *unary() {
   if (consume_kind(TK_SIZEOF)) {
     Node *n = unary();
     Type *t = get_type(n);
-    int size = t && t->ty == PTR ? 8 : 4;
+    int size = t && t->ty == PTR ? 8
+             : t && t->ty == CHAR ? 1 : 4;
     return new_node_num(size);
   }
   return primary();
@@ -370,7 +375,7 @@ Node *define_variable(Define *def, LVar **varlist) {
   }
   Type *type = def->type;
 
-  int size = type->ty == PTR ? 8 : 4;
+  int size = type->ty == PTR ? 8 : type->ty == CHAR ? 1 : 4;
 
   // 配列かチェック
   while (consume("[")) {
@@ -386,7 +391,7 @@ Node *define_variable(Define *def, LVar **varlist) {
 
   // TODO 要確認 変数のoffset値は8の倍数じゃないとダメっぽい。
   while((size % 8) != 0) {
-    size += 4;
+    size += 1;
   }
 
   Node *node = calloc(1, sizeof(Node));
