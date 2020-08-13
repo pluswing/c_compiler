@@ -302,7 +302,7 @@ assert 12 "int main() return bar2(3, 4, 5);"
 # &, *
 assert 3 "int main() {
   int x;
-  int y;
+  int *y;
   x = 3;
   y = &x;
   return *y;
@@ -310,10 +310,10 @@ assert 3 "int main() {
 assert 3 "int main() {
   int x;
   int y;
-  int z;
+  int *z;
   x = 3;
   y = 5;
-  z = &y + 8;
+  z = &y + 4;
   return *z;
 }"
 

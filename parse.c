@@ -389,11 +389,6 @@ Node *define_variable(Define *def, LVar **varlist) {
     expect("]");
   }
 
-  // TODO 要確認 変数のoffset値は8の倍数じゃないとダメっぽい。
-  while((size % 8) != 0) {
-    size += 1;
-  }
-
   Node *node = calloc(1, sizeof(Node));
   node->varname = calloc(100, sizeof(char));
   memcpy(node->varname, def->ident->str, def->ident->len);
