@@ -17,6 +17,7 @@ typedef enum {
   TK_FOR, // for
   TK_TYPE, // int
   TK_SIZEOF, // sizeof
+  TK_STRING, // 文字列
   TK_EOF, // 入力の終わりを表すトークン
 } TokenKind;
 
@@ -53,6 +54,12 @@ typedef struct Define Define;
 struct Define {
   Type *type;
   Token *ident;
+};
+
+typedef struct StringToken StringToken;
+struct StringToken {
+  char *name;
+  StringToken *next;
 };
 
 extern Token *token;
@@ -98,6 +105,7 @@ typedef enum {
   ND_DEREF, // *
   ND_GVAR_DEF, // グローバル変数の定義
   ND_GVAR, // グローバル変数の使用
+  ND_STRING, // 文字列
   ND_NUM,
 } NodeKind;
 
@@ -115,6 +123,7 @@ struct Node {
   Type *type; // only kind == ND_LVAR
   char *varname; // only kind == ND_*VAR
   int size;      // only kind == ND_*VAR
+  StringToken *string; // only kind == ND_STRING
 };
 
 extern Node *code[];

@@ -166,6 +166,20 @@ Token *tokenize() {
       continue;
     }
 
+    if ('"' == *p) {
+      p++;
+      char *c = p;
+      while('"' != *c) {
+        c++;
+      }
+      c--;
+      int len = c - p;
+      cur = new_token(TK_STRING, cur, p, len);
+      p = c;
+      p += 2;
+      continue;
+    }
+
     error_at(p, "expected a number");
   }
 

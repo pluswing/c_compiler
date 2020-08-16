@@ -3,6 +3,7 @@
 LVar *locals[100];
 LVar *globals[100];
 int cur_func = 0;
+StringToken *strings;
 
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
@@ -20,6 +21,12 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
 Node *new_node_num(int val) {
   Node *node = new_node(ND_NUM);
   node->val = val;
+  return node;
+}
+
+Node *new_node_string(StringToken *s) {
+  Node *node = new_node(ND_STRING);
+  node->string = s;
   return node;
 }
 
@@ -364,6 +371,16 @@ Node *primary() {
     }
     // 関数呼び出しではない場合、変数。
     return variable(tok);
+  }
+
+  if (tok = consume_kind(TK_STRING)) {
+    // 文字列
+    StringToken *s = calloc(1, sizeof(StringToken));
+    s->name = calloc(100, sizeof(char));
+    memcpy(s->name, tok->str, tok->len);
+    s->next = strings;
+    strings = s;
+    return new_node_string(s);
   }
 
   return new_node_num(expect_number());

@@ -20,6 +20,13 @@ assert() {
   fi
 }
 
+# string
+assert 0 'int main() {
+  char *a;
+  a = "abcd";
+  return 0;
+}'
+
 # sizeof char
 assert 1 "int main() {
   char a;

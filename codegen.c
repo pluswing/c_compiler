@@ -31,6 +31,9 @@ void gen(Node *node) {
   Type *t;
 
   switch (node->kind) {
+  case ND_STRING:
+    // TODO 実装する
+    return;
   case ND_GVAR_DEF:
     printf("%s:\n", node->varname);
     printf("  .zero %d\n", node->size);

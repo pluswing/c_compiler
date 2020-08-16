@@ -18,6 +18,10 @@ int main(int argc, char **argv) {
     }
   }
 
+  // TODO こういうのを出す
+  // .LC0:
+  // .string "abc"
+
   printf(".text\n");
   cur_func = 0;
   for (int i = 0; code[i]; i++) {
