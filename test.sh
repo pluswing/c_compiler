@@ -21,10 +21,11 @@ assert() {
 }
 
 # string
-assert 0 'int main() {
+assert 97 'int main() {
   char *a;
   a = "abcd";
-  return 0;
+  printf(a);
+  return a[0];
 }'
 
 # sizeof char

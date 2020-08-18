@@ -58,7 +58,8 @@ struct Define {
 
 typedef struct StringToken StringToken;
 struct StringToken {
-  char *name;
+  int index;
+  char *value;
   StringToken *next;
 };
 
@@ -127,6 +128,7 @@ struct Node {
 };
 
 extern Node *code[];
+extern StringToken *strings;
 
 Node *new_node(NodeKind kind);
 Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);

@@ -32,7 +32,7 @@ void gen(Node *node) {
 
   switch (node->kind) {
   case ND_STRING:
-    // TODO 実装する
+    printf("  push offset .LC_%d\n", node->string->index);
     return;
   case ND_GVAR_DEF:
     printf("%s:\n", node->varname);
@@ -94,7 +94,7 @@ void gen(Node *node) {
     printf("  jmp .L.end.%03d\n", id);
     printf(".L.call.%03d:\n", id);
     printf("  sub rsp, 8\n");
-    printf("  mov rax, 0\n");
+    printf("  mov rax, 0\n"); // ALに0を入れる。
     printf("  call %s\n", node->funcname);
     printf("  add rsp, 8\n");
     printf(".L.end.%03d:\n", id);

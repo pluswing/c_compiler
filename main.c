@@ -18,9 +18,11 @@ int main(int argc, char **argv) {
     }
   }
 
-  // TODO こういうのを出す
-  // .LC0:
-  // .string "abc"
+  printf(".data\n");
+  for (StringToken *s = strings; s; s = s->next) {
+    printf(".LC_%d:\n", s->index);
+    printf("  .string \"%s\"\n", s->value);
+  }
 
   printf(".text\n");
   cur_func = 0;

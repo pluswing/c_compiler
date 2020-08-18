@@ -376,8 +376,13 @@ Node *primary() {
   if (tok = consume_kind(TK_STRING)) {
     // 文字列
     StringToken *s = calloc(1, sizeof(StringToken));
-    s->name = calloc(100, sizeof(char));
-    memcpy(s->name, tok->str, tok->len);
+    s->value = calloc(100, sizeof(char));
+    memcpy(s->value, tok->str, tok->len);
+    if (strings) {
+      s->index = strings->index + 1;
+    } else {
+      s->index = 0;
+    }
     s->next = strings;
     strings = s;
     return new_node_string(s);

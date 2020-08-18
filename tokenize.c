@@ -172,11 +172,10 @@ Token *tokenize() {
       while('"' != *c) {
         c++;
       }
-      c--;
       int len = c - p;
       cur = new_token(TK_STRING, cur, p, len);
       p = c;
-      p += 2;
+      p++;
       continue;
     }
 
