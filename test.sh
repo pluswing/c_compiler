@@ -20,6 +20,21 @@ assert() {
   fi
 }
 
+# block comment
+assert 1 "int main() {
+  /*
+    int a;
+    a = 3;
+    return a;
+  */
+  return 1;
+}"
+# line commnet
+assert 1 "int main() {
+  // return 2;
+  return 1;
+}"
+
 # string
 assert 97 'int main() {
   char *a;
