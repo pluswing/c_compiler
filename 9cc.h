@@ -66,10 +66,13 @@ struct StringToken {
 
 extern Token *token;
 extern char *user_input;
+extern char *filename;
+
 extern LVar *locals[];
 extern LVar *globals[];
 extern int cur_func;
 
+char *read_file(char *path);
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 bool consume(char *op);
