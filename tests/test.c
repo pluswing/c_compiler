@@ -183,6 +183,99 @@ int test_pointer() {
   inner_test_pointer02();
 }
 
+int test_func_def_func1(int a, int b) { return a + b; }
+int test_func_def_func2(int a, int b, int c) { return a + c; }
+int test_func_def() {
+  assert(3, test_func_def_func1(1, 2));
+  assert(4, test_func_def_func2(1, 2, 3));
+}
+
+int sum(int n) {
+  if (n < 0) return 0;
+  return n + sum(n - 1);
+}
+
+int test_func_def_recursive() {
+  int a;
+  a = 10;
+  assert(55, sum(a));
+}
+
+int test_pointer_calc() {
+  int *p;
+  alloc4(&p, 1, 2, 4, 8);
+
+  int *q;
+  q = p + 2;
+  assert(4, *q);
+
+  q = p + 3;
+  assert(8, *q);
+
+  q = q - 2;
+  assert(2, *q);
+}
+
+int test_sizeof() {
+  int x;
+  assert(4, sizeof(x));
+
+  int *y;
+  assert(8, sizeof(y));
+
+  assert(8, sizeof(y + 3));
+
+  assert(4, sizeof(*y));
+
+  assert(4, sizeof(1));
+}
+
+int test_array() {
+  int a[2];
+  *a = 1;
+  *(a + 1) = 2;
+  int *p;
+  p = a;
+  assert(3, *p + *(p + 1));
+}
+
+int test_array_access() {
+  int a[2];
+  a[0] = 1;
+  a[1] = 2;
+  int *p;
+  p = a;
+  // FIXME
+  // assert(3, p[0] + p[1]);
+}
+/*
+// FIXME
+int g_a;
+int g_b[10];
+int test_global_variable() {
+  g_a = 10;
+  assert(10, g_a);
+}
+*/
+
+int test_char() {
+  char x[3];
+  x[0] = -1;
+  x[1] = 2;
+  int y;
+  y = 4;
+  // FIXME
+  assert(3, x[0] + y);
+  assert(1, sizeof(x[0]));
+}
+
+int test_string() {
+  char *a;
+  a = "abcd";
+  // FIXME
+  assert(97, a[0]);
+}
+
 int main() {
 
   test_calc();
@@ -196,6 +289,15 @@ int main() {
   test_block();
   test_func();
   test_pointer();
+  test_func_def();
+  test_func_def_recursive();
+  test_pointer_calc();
+  test_sizeof();
+  test_array();
+  test_array_access();
+  // test_global_variable();
+  // test_char();
+  // test_string();
 
   printf("OK\n");
   return 0;
