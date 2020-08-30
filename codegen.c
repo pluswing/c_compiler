@@ -43,8 +43,15 @@ void gen(Node *node) {
     return;
   case ND_DEREF:
     gen(node->lhs);
+    t = get_type(node);
     printf("  pop rax\n");
-    printf("  mov rax, [rax]\n");
+    if (t && t->ty == CHAR) {
+      printf("  movsx rax, BYTE PTR [rax]\n");
+    } else if (t && t->ty == INT) {
+      printf("  movsxd rax, DWORD PTR [rax]\n");
+    } else {
+      printf("  mov rax, [rax]\n");
+    }
     printf("  push rax\n");
     return;
   case ND_FUNC_DEF:

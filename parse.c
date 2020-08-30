@@ -457,7 +457,11 @@ Node *variable(Token *tok) {
     Node *add = calloc(1, sizeof(Node));
     add->kind = ND_ADD;
     add->lhs = node;
-    add->rhs = expr();
+    if (node->type && node->type->ty != INT) {
+      int n = node->type->ptr_to->ty == INT ? 4
+            : node->type->ptr_to->ty == CHAR ? 1 : 8;
+      add->rhs = new_binary(ND_MUL, expr(), new_node_num(n));
+    }
     node = calloc(1, sizeof(Node));
     node->kind = ND_DEREF;
     node->lhs = add;

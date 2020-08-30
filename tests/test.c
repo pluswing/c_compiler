@@ -1,3 +1,6 @@
+int g_a;
+int g_b[10];
+
 int assert(int expected, int actual) {
 
   if (expected == actual) {
@@ -245,18 +248,13 @@ int test_array_access() {
   a[1] = 2;
   int *p;
   p = a;
-  // FIXME
-  // assert(3, p[0] + p[1]);
+  assert(3, p[0] + p[1]);
 }
-/*
-// FIXME
-int g_a;
-int g_b[10];
+
 int test_global_variable() {
   g_a = 10;
   assert(10, g_a);
 }
-*/
 
 int test_char() {
   char x[3];
@@ -264,7 +262,6 @@ int test_char() {
   x[1] = 2;
   int y;
   y = 4;
-  // FIXME
   assert(3, x[0] + y);
   assert(1, sizeof(x[0]));
 }
@@ -272,7 +269,6 @@ int test_char() {
 int test_string() {
   char *a;
   a = "abcd";
-  // FIXME
   assert(97, a[0]);
 }
 
@@ -295,9 +291,9 @@ int main() {
   test_sizeof();
   test_array();
   test_array_access();
-  // test_global_variable();
-  // test_char();
-  // test_string();
+  test_global_variable();
+  test_char();
+  test_string();
 
   printf("OK\n");
   return 0;
