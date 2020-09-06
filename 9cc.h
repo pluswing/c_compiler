@@ -42,6 +42,7 @@ struct Type {
 
 typedef struct LVar LVar;
 
+struct Node;
 struct LVar {
   LVar *next;
   char *name;
@@ -49,6 +50,7 @@ struct LVar {
   int offset;
   Type *type;
   enum { LOCAL, GLOBAL } kind;
+  struct Node *init;
 };
 
 typedef struct Define Define;
@@ -129,6 +131,7 @@ struct Node {
   char *varname; // only kind == ND_*VAR
   int size;      // only kind == ND_*VAR
   StringToken *string; // only kind == ND_STRING
+  LVar *var;           // only kind = ND_*VAR_DEF
 };
 
 extern Node *code[];

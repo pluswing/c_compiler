@@ -1,5 +1,6 @@
 int g_a;
 int g_b[10];
+int g_a_init3 = 3;
 
 int assert(int expected, int actual) {
 
@@ -272,6 +273,10 @@ int test_string() {
   assert(97, a[0]);
 }
 
+int test_gbar_init() {
+  assert(3, g_a_init3);
+}
+
 int main() {
 
   test_calc();
@@ -294,6 +299,7 @@ int main() {
   test_global_variable();
   test_char();
   test_string();
+  test_gbar_init();
 
   printf("OK\n");
   return 0;

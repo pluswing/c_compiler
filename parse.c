@@ -411,6 +411,19 @@ Node *define_variable(Define *def, LVar **varlist) {
     expect("]");
   }
 
+  // 初期化式
+  /*
+  int a = 3;
+  char b[] = "foobar";
+  int *c = &a;
+  char *d = b + 3;
+  */
+  Node *init = NULL;
+  if (consume("=")) {
+    // 初期化式あり
+    init = expr();
+  }
+
   Node *node = calloc(1, sizeof(Node));
   node->varname = calloc(100, sizeof(char));
   memcpy(node->varname, def->ident->str, def->ident->len);
@@ -426,6 +439,7 @@ Node *define_variable(Define *def, LVar **varlist) {
   lvar->next = varlist[cur_func];
   lvar->name = def->ident->str;
   lvar->len = def->ident->len;
+  lvar->init = init;
   if (varlist[cur_func] == NULL) {
     lvar->offset = size;
   } else {
@@ -434,6 +448,7 @@ Node *define_variable(Define *def, LVar **varlist) {
   lvar->type = type;
   node->offset = lvar->offset;
   node->type = lvar->type;
+  node->var = lvar;
   varlist[cur_func] = lvar;
   return node;
 }

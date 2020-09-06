@@ -36,7 +36,12 @@ void gen(Node *node) {
     return;
   case ND_GVAR_DEF:
     printf("%s:\n", node->varname);
-    printf("  .zero %d\n", node->size);
+    if (!node->var->init) {
+      printf("  .zero %d\n", node->size);
+      return;
+    }
+    // とりあえずND_NUMのみサポート
+    printf("  .long %d\n", node->var->init->val);
     return;
   case ND_ADDR:
     gen_val(node->lhs);

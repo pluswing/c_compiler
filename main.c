@@ -14,12 +14,17 @@ int main(int argc, char **argv) {
   printf(".intel_syntax noprefix\n");
   printf(".bss\n");
   for (int i = 0; code[i]; i++) {
-    if (code[i]->kind == ND_GVAR_DEF) {
+    if (code[i]->kind == ND_GVAR_DEF && !code[i]->var->init) {
       gen(code[i]);
     }
   }
 
   printf(".data\n");
+  for (int i = 0; code[i]; i++) {
+    if (code[i]->kind == ND_GVAR_DEF && code[i]->var->init) {
+      gen(code[i]);
+    }
+  }
   for (StringToken *s = strings; s; s = s->next) {
     printf(".LC_%d:\n", s->index);
     printf("  .string \"%s\"\n", s->value);
