@@ -40,7 +40,14 @@ void gen(Node *node) {
       printf("  .zero %d\n", node->size);
       return;
     }
-    // とりあえずND_NUMのみサポート
+    if (node->type->ty == ARRAY) {
+      for (int i = 0; node->var->init->block[i]; i++) {
+        // TODO なんの配列(型)かをみつ必要あり。
+        // char[]の場合は、.byteにしないとダメ。
+        printf("  .long %x\n", node->var->init->block[i]->val);
+      }
+      return;
+    }
     printf("  .long %d\n", node->var->init->val);
     return;
   case ND_ADDR:

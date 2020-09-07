@@ -1,6 +1,7 @@
 int g_a;
 int g_b[10];
 int g_a_init3 = 3;
+int g_array[5] = {0, 1, 2, 3, 4};
 
 int assert(int expected, int actual) {
 
@@ -275,6 +276,9 @@ int test_string() {
 
 int test_gbar_init() {
   assert(3, g_a_init3);
+
+  assert(0, g_array[0]);
+  assert(4, g_array[4]);
 }
 
 int main() {

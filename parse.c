@@ -421,7 +421,20 @@ Node *define_variable(Define *def, LVar **varlist) {
   Node *init = NULL;
   if (consume("=")) {
     // 初期化式あり
-    init = expr();
+    if (consume("{")) {
+      // 配列の初期化式
+      init = calloc(1, sizeof(Node));
+      init->block = calloc(100, sizeof(Node));
+      for(int i = 0; !consume("}"); i++) {
+        init->block[i] = expr();
+        if (consume("}")) {
+          break;
+        }
+        expect(",");
+      }
+    } else {
+      init = expr();
+    }
   }
 
   Node *node = calloc(1, sizeof(Node));
