@@ -42,10 +42,20 @@ void gen(Node *node) {
     }
     if (node->type->ty == ARRAY) {
       for (int i = 0; node->var->init->block[i]; i++) {
-        // TODO なんの配列(型)かをみつ必要あり。
-        // char[]の場合は、.byteにしないとダメ。
-        printf("  .long %x\n", node->var->init->block[i]->val);
+        switch (node->type->ptr_to->ty) {
+        case INT:
+          printf("  .long %x\n", node->var->init->block[i]->val);
+          break;
+        case CHAR:
+          printf("  .byte %x\n", node->var->init->block[i]->val);
+          break;
+        // TODO PTRの場合も考慮する必要あり。
+        }
       }
+      return;
+    }
+    if (node->var->init->kind == ND_STRING) {
+      printf("  .ascii \"%s\"\n", node->var->init->string->value);
       return;
     }
     printf("  .long %d\n", node->var->init->val);
