@@ -40,7 +40,7 @@ void gen(Node *node) {
       printf("  .zero %d\n", node->size);
       return;
     }
-    if (node->type->ty == ARRAY) {
+    if (node->type->ty == ARRAY && node->var->init->block) {
       for (int i = 0; node->var->init->block[i]; i++) {
         switch (node->type->ptr_to->ty) {
         case INT:
@@ -55,7 +55,11 @@ void gen(Node *node) {
       return;
     }
     if (node->var->init->kind == ND_STRING) {
-      printf("  .ascii \"%s\"\n", node->var->init->string->value);
+      if (node->type->ty == ARRAY) {
+        printf("  .string \"%s\"\n", node->var->init->string->value);
+      } else {
+        printf("  .quad .LC_%d\n", node->var->init->string->index);
+      }
       return;
     }
     printf("  .long %d\n", node->var->init->val);

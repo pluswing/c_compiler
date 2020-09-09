@@ -4,6 +4,7 @@ int g_a_init3 = 3;
 int g_array[5] = {0, 1, 2, 3, 4};
 char g_array2[5] = {5, 6, 7, 8, 9};
 char *g_msg1 = "foo";
+char g_msg2[4] = "bar";
 
 int assert(int expected, int actual) {
 
@@ -287,6 +288,9 @@ int test_gbar_init() {
 
   assert(102, g_msg1[0]);
   assert(111, g_msg1[2]);
+
+  assert(98, g_msg2[0]);
+  assert(114, g_msg2[2]);
 }
 
 int main() {
