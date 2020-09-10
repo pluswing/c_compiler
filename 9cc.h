@@ -94,6 +94,7 @@ typedef enum {
   ND_DIV,
   ND_ASSIGN, // =
   ND_LVAR, // local variables
+  ND_LVAR_DEF, // ローカル変数の定義
   ND_EQ,
   ND_NE,
   ND_LT, // <

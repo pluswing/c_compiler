@@ -194,6 +194,7 @@ Node *stmt() {
   Define *def = read_define();
   if (def) {
     node = define_variable(def, locals);
+    node->kind = ND_LVAR_DEF;
     expect(";");
     return node;
   }
