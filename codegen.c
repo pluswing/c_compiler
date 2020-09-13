@@ -6,7 +6,7 @@ void gen_val(Node *node) {
     return;
   }
 
-  if (node->kind == ND_LVAR || node->kind == ND_LVAR_DEF) {
+  if (node->kind == ND_LVAR) {
     printf("  mov rax, rbp\n");
     printf("  sub rax, %d\n", node->offset);
     printf("  push rax\n");
@@ -63,25 +63,6 @@ void gen(Node *node) {
       return;
     }
     printf("  .long 0x%x\n", node->var->init->val);
-    return;
-  case ND_LVAR_DEF:
-    if (!node->var->init) {
-      return;
-    }
-    gen_val(node);
-    gen(node->var->init);
-    t = get_type(node);
-
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
-    if (t && t->ty == CHAR) {
-      printf("  mov [rax], dil\n");
-    } else if (t && t->ty == INT) {
-      printf("  mov [rax], edi\n");
-    } else {
-      printf("  mov [rax], rdi\n");
-    }
-    printf("  push rdi\n");
     return;
   case ND_ADDR:
     gen_val(node->lhs);

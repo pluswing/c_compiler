@@ -296,6 +296,11 @@ int test_gloval_variable_init() {
 int test_local_variable_init() {
   int a = 10;
   assert(10, a);
+
+  int b[3] = {1, 2, 7};
+  assert(1, b[0]);
+  assert(2, b[1]);
+  assert(7, b[2]);
 }
 
 int main() {

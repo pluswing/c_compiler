@@ -94,7 +94,6 @@ typedef enum {
   ND_DIV,
   ND_ASSIGN, // =
   ND_LVAR, // local variables
-  ND_LVAR_DEF, // ローカル変数の定義
   ND_EQ,
   ND_NE,
   ND_LT, // <
@@ -153,6 +152,7 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+Node *local_variable_init(Node *node);
 Node *define_variable();
 Node *variable(Token *tok);
 Type *get_type(Node *node);

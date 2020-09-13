@@ -194,7 +194,7 @@ Node *stmt() {
   Define *def = read_define();
   if (def) {
     node = define_variable(def, locals);
-    node->kind = ND_LVAR_DEF;
+    node = local_variable_init(node);
     expect(";");
     return node;
   }
@@ -390,6 +390,47 @@ Node *primary() {
   }
 
   return new_node_num(expect_number());
+}
+
+Node *local_variable_init(Node *node) {
+  if (!node->var->init) {
+    return node;
+  }
+  Node* assign;
+
+  // int x[] = {1, 2, foo()};
+  if (node->type->ty == ARRAY && node->var->init->block) {
+    Node* block = calloc(1, sizeof(Node));
+    block->block = calloc(100, sizeof(Node));
+    block->kind = ND_BLOCK;
+    for (int i = 0; node->var->init->block[i]; i++) {
+      // add = a[0]
+      Node *add = calloc(1, sizeof(Node));
+      add->kind = ND_ADD;
+      add->lhs = node;
+      if (node->type && node->type->ty != INT) {
+        int n = node->type->ptr_to->ty == INT ? 4
+              : node->type->ptr_to->ty == CHAR ? 1 : 8;
+        add->rhs = new_node_num(i * n);
+      }
+      Node* deref = calloc(1, sizeof(Node));
+      deref->kind = ND_DEREF;
+      deref->lhs = add;
+
+      assign = calloc(1, sizeof(Node));
+      assign->kind = ND_ASSIGN;
+      assign->lhs = deref;
+      assign->rhs = node->var->init->block[i];
+      block->block[i] = assign;
+    }
+    return block;
+  }
+
+  assign = calloc(1, sizeof(Node));
+  assign->kind = ND_ASSIGN;
+  assign->lhs = node;
+  assign->rhs = node->var->init;
+  return assign;
 }
 
 Node *define_variable(Define *def, LVar **varlist) {
