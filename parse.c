@@ -398,6 +398,39 @@ Node *local_variable_init(Node *node) {
   }
   Node* assign;
 
+  if (node->var->init->kind == ND_STRING) {
+    // 文字列の場合は、各要素をそれぞれ代入する形に変換をかける
+    Node* block = calloc(1, sizeof(Node));
+    block->block = calloc(100, sizeof(Node));
+    block->kind = ND_BLOCK;
+    int len = strlen(node->var->init->string->value);
+    for (int i = 0; i < node->type->array_size; i++) {
+      // add = a[0]
+      Node *add = calloc(1, sizeof(Node));
+      add->kind = ND_ADD;
+      add->lhs = node;
+      if (node->type && node->type->ty != INT) {
+        int n = node->type->ptr_to->ty == INT ? 4
+              : node->type->ptr_to->ty == CHAR ? 1 : 8;
+        add->rhs = new_node_num(i * n);
+      }
+      Node* deref = calloc(1, sizeof(Node));
+      deref->kind = ND_DEREF;
+      deref->lhs = add;
+
+      assign = calloc(1, sizeof(Node));
+      assign->kind = ND_ASSIGN;
+      assign->lhs = deref;
+      if (len > i) {
+        assign->rhs = new_node_num(node->var->init->string->value[i]);
+      } else {
+        assign->rhs = new_node_num(0);
+      }
+      block->block[i] = assign;
+    }
+    return block;
+  }
+
   // int x[] = {1, 2, foo()};
   if (node->type->ty == ARRAY && node->var->init->block) {
     Node* block = calloc(1, sizeof(Node));
@@ -438,6 +471,10 @@ Node *define_variable(Define *def, LVar **varlist) {
     error("invalid define");
   }
   Type *type = def->type;
+
+  Node *node = calloc(1, sizeof(Node));
+  node->varname = calloc(100, sizeof(char));
+  memcpy(node->varname, def->ident->str, def->ident->len);
 
   int size = type->ty == PTR ? 8 : type->ty == CHAR ? 1 : 4;
 
@@ -487,12 +524,14 @@ Node *define_variable(Define *def, LVar **varlist) {
       }
     } else {
       init = expr();
+      if (init->kind == ND_STRING) {
+        int len = strlen(init->string->value) + 1;
+        if (type->array_size < len) {
+          type->array_size = len;
+        }
+      }
     }
   }
-
-  Node *node = calloc(1, sizeof(Node));
-  node->varname = calloc(100, sizeof(char));
-  memcpy(node->varname, def->ident->str, def->ident->len);
 
   if (type->ty == ARRAY) {
     if (type->array_size == 0) {

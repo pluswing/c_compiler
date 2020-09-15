@@ -314,6 +314,15 @@ int test_local_variable_init() {
 
   assert(3, e[0]);
   assert(5, e[2]);
+
+  char abc[10] = "abc";
+  char def[] = "def";
+
+  assert(97, abc[0]);
+  assert(99, abc[2]);
+
+  assert(100, def[0]);
+  assert(102, def[2]);
 }
 
 int main() {
