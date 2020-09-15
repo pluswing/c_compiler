@@ -301,6 +301,19 @@ int test_local_variable_init() {
   assert(1, b[0]);
   assert(2, b[1]);
   assert(7, b[2]);
+
+  int c[] = { 1, 2 };
+  int d[5] = { 5 };
+  int e[3] = { 3, 4, 5 };
+
+  assert(1, c[0]);
+  assert(2, c[1]);
+
+  assert(5, d[0]);
+  assert(0, d[1]);
+
+  assert(3, e[0]);
+  assert(5, e[2]);
 }
 
 int main() {

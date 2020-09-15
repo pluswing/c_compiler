@@ -447,9 +447,12 @@ Node *define_variable(Define *def, LVar **varlist) {
     t = calloc(1, sizeof(Type));
     t->ty = ARRAY;
     t->ptr_to = type;
-    t->array_size = expect_number();
+    t->array_size = 0;
+    Token *num = NULL;
+    if (num = consume_kind(TK_NUM)) {
+      t->array_size = num->val;
+    }
     type = t;
-    size *= t->array_size;
     expect("]");
   }
 
@@ -467,12 +470,20 @@ Node *define_variable(Define *def, LVar **varlist) {
       // 配列の初期化式
       init = calloc(1, sizeof(Node));
       init->block = calloc(100, sizeof(Node));
-      for(int i = 0; !consume("}"); i++) {
+      int i = 0;
+      for(i = 0; !consume("}"); i++) {
         init->block[i] = expr();
         if (consume("}")) {
           break;
         }
         expect(",");
+      }
+      if (type->array_size < i) {
+        type->array_size = i;
+      }
+      // TODO 要確認。indexがずれてない？？
+      for (i++; i < type->array_size; i++) {
+        init->block[i] = new_node_num(0);
       }
     } else {
       init = expr();
@@ -482,6 +493,13 @@ Node *define_variable(Define *def, LVar **varlist) {
   Node *node = calloc(1, sizeof(Node));
   node->varname = calloc(100, sizeof(char));
   memcpy(node->varname, def->ident->str, def->ident->len);
+
+  if (type->ty == ARRAY) {
+    if (type->array_size == 0) {
+      error("undefined array size: %s", node->varname);
+    }
+    size *= type->array_size;
+  }
   node->size = size;
 
   LVar *lvar = find_variable(def->ident);
