@@ -5,6 +5,8 @@ int g_array[5] = {0, 1, 2, 3, 4};
 char g_array2[5] = {5, 6, 7, 8, 12};
 char *g_msg1 = "foo";
 char g_msg2[4] = "bar";
+// TODO これたぶん未対応
+//char *a[] = {"abc", "def"};
 
 int assert(int expected, int actual) {
 
