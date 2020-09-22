@@ -145,6 +145,7 @@ ReservedWord reservedWords[] = {
   {"int", TK_TYPE},
   {"char", TK_TYPE},
   {"sizeof", TK_SIZEOF},
+  {"struct", TK_STRUCT},
   {"", TK_EOF},
 };
 

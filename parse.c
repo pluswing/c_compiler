@@ -47,6 +47,8 @@ void program() {
 Node *func() {
   Node *node;
 
+  // define_struct();
+
   Define *def = read_define();
 
   if (consume("(")) {
@@ -73,6 +75,20 @@ Node *func() {
     expect(";");
     return node;
   }
+}
+
+void define_struct() {
+  if (!consume_kind(TK_STRUCT)) {
+    return;
+  }
+  expect("{");
+  LVar *members = calloc(1, sizeof(LVar));
+  while(!consume("}")) {
+    Define *def = read_define();
+    Node *n = define_variable(def, &members);
+    expect(";");
+  }
+  expect(";");
 }
 
 // 関数か変数の定義の前半部分を読んで、LVarに詰める
