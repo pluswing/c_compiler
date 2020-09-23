@@ -4,6 +4,8 @@ LVar *locals[100];
 LVar *globals[100];
 int cur_func = 0;
 StringToken *strings;
+int struct_def_index = 0;
+Type *structs[100];
 
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
@@ -38,7 +40,10 @@ Node *code[100];
 void program() {
   int i = 0;
   while(!at_eof()) {
-    code[i++] = func();
+    Node *n = func();
+    if (n) {
+      code[i++] = n;
+    }
   }
   code[i] = NULL;
 }
@@ -47,7 +52,11 @@ void program() {
 Node *func() {
   Node *node;
 
-  // define_struct();
+  Type *t = define_struct();
+  if (t) {
+    structs[struct_def_index++] = t;
+    return NULL;
+  }
 
   Define *def = read_define();
 
@@ -77,18 +86,29 @@ Node *func() {
   }
 }
 
-void define_struct() {
+Type *define_struct() {
   if (!consume_kind(TK_STRUCT)) {
-    return;
+    return NULL;
   }
+  Token *name = consume_kind(TK_IDENT);
   expect("{");
-  LVar *members = calloc(1, sizeof(LVar));
+  Type *t = calloc(1, sizeof(Type));
+  t->ty = STRUCT;
   while(!consume("}")) {
     Define *def = read_define();
-    Node *n = define_variable(def, &members);
+    read_type(def);
     expect(";");
+    Member *m = calloc(1, sizeof(Member));
+    m->name = calloc(100, sizeof(char));
+    memcpy(m->name, def->ident->str, def->ident->len);
+    m->ty = def->type;
+    // TODO 配列の場合は、別途計算必要
+    m->offset = get_size(def->type);
+    m->next = t->members;
+    t->members = m;
   }
   expect(";");
+  return t;
 }
 
 // 関数か変数の定義の前半部分を読んで、LVarに詰める
@@ -482,18 +502,11 @@ Node *local_variable_init(Node *node) {
   return assign;
 }
 
-Node *define_variable(Define *def, LVar **varlist) {
+void read_type(Define *def) {
   if (def == NULL) {
     error("invalid define");
   }
   Type *type = def->type;
-
-  Node *node = calloc(1, sizeof(Node));
-  node->varname = calloc(100, sizeof(char));
-  memcpy(node->varname, def->ident->str, def->ident->len);
-
-  int size = type->ty == PTR ? 8 : type->ty == CHAR ? 1 : 4;
-
   // 配列かチェック
   while (consume("[")) {
     Type *t;
@@ -508,6 +521,21 @@ Node *define_variable(Define *def, LVar **varlist) {
     type = t;
     expect("]");
   }
+  def->type = type;
+}
+
+int get_size(Type *type) {
+  return type->ty == PTR ? 8 : type->ty == CHAR ? 1 : 4;
+}
+
+Node *define_variable(Define *def, LVar **varlist) {
+  read_type(def);
+  Type *type = def->type;
+  int size = get_size(type);
+  Node *node = calloc(1, sizeof(Node));
+  node->varname = calloc(100, sizeof(char));
+  memcpy(node->varname, def->ident->str, def->ident->len);
+
 
   // 初期化式
   /*

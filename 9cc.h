@@ -33,12 +33,30 @@ struct Token {
   int len;
 };
 
+
+typedef struct Member Member;
 typedef struct Type Type;
 
+struct Member {
+  Member *next;
+  Type *ty;
+  char *name;
+  int offset;
+};
+
+typedef enum {
+  INT,
+  PTR,
+  ARRAY,
+  CHAR,
+  STRUCT
+} TypeKind;
+
 struct Type {
-  enum { INT, PTR, ARRAY, CHAR } ty;
+  TypeKind ty;
   struct Type *ptr_to;
   size_t array_size;
+  Member *members;
 };
 
 typedef struct LVar LVar;
@@ -159,7 +177,9 @@ Node *variable(Token *tok);
 Type *get_type(Node *node);
 Define *read_define();
 LVar *find_variable(Token *tok);
-void define_struct();
+Type *define_struct();
+void read_type(Define *def);
+int get_size(Type *type);
 
 void gen_val(Node *node);
 void gen(Node *node);
