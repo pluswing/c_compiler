@@ -327,6 +327,12 @@ int test_local_variable_init() {
   assert(102, def[2]);
 }
 
+int test_struct() {
+  struct {int a; int b;} abc;
+  abc.a = 10;
+  assert(10, abc.a);
+}
+
 int main() {
 
   test_calc();
@@ -351,6 +357,7 @@ int main() {
   test_string();
   test_gloval_variable_init();
   test_local_variable_init();
+  test_struct();
 
   printf("OK\n");
   return 0;

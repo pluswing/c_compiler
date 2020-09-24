@@ -40,10 +40,7 @@ Node *code[100];
 void program() {
   int i = 0;
   while(!at_eof()) {
-    Node *n = func();
-    if (n) {
-      code[i++] = n;
-    }
+    code[i++] = func();
   }
   code[i] = NULL;
 }
@@ -51,13 +48,13 @@ void program() {
 // func = "int" ident "(" ("int" ident ("," "int" ident)*)? ")" stmt
 Node *func() {
   Node *node;
-
+/*
   Type *t = define_struct();
   if (t) {
     structs[struct_def_index++] = t;
     return NULL;
   }
-
+*/
   Define *def = read_define();
 
   if (consume("(")) {
@@ -90,7 +87,7 @@ Type *define_struct() {
   if (!consume_kind(TK_STRUCT)) {
     return NULL;
   }
-  Token *name = consume_kind(TK_IDENT);
+  // Token *name = consume_kind(TK_IDENT);
   expect("{");
   Type *t = calloc(1, sizeof(Type));
   t->ty = STRUCT;
@@ -103,25 +100,33 @@ Type *define_struct() {
     memcpy(m->name, def->ident->str, def->ident->len);
     m->ty = def->type;
     // TODO 配列の場合は、別途計算必要
-    m->offset = get_size(def->type);
+    if (t->members) {
+      m->offset = t->members->offset + get_size(def->type);
+    } else {
+      m->offset = get_size(def->type);
+    }
     m->next = t->members;
     t->members = m;
   }
-  expect(";");
+  // expect(";");
   return t;
 }
 
 // 関数か変数の定義の前半部分を読んで、LVarに詰める
 Define *read_define() {
-  Token *typeToken = consume_kind(TK_TYPE);
-  if (!typeToken) {
-    return NULL;
+  Type *type = define_struct();
+  if (!type) {
+    Token *typeToken = consume_kind(TK_TYPE);
+    if (!typeToken) {
+      return NULL;
+    }
+
+    type = calloc(1, sizeof(Type));
+    int isChar = memcmp("char", typeToken->str, typeToken->len) == 0;
+    type->ty = isChar ? CHAR : INT;
+    type->ptr_to = NULL;
   }
 
-  Type *type = calloc(1, sizeof(Type));
-  int isChar = memcmp("char", typeToken->str, typeToken->len) == 0;
-  type->ty = isChar ? CHAR : INT;
-  type->ptr_to = NULL;
   while(consume("*")) {
     Type *t;
     t = calloc(1, sizeof(Type));
@@ -638,6 +643,11 @@ Node *variable(Token *tok) {
     node->lhs = add;
     expect("]");
   }
+/*
+  node->kind = ND_MEMBER;
+  node->lhs = node;
+  node->members = find_member(...); // a
+*/
   return node;
 }
 
