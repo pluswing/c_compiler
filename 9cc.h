@@ -57,6 +57,7 @@ struct Type {
   struct Type *ptr_to;
   size_t array_size;
   Member *members;
+  int size;
 };
 
 typedef struct LVar LVar;
@@ -132,6 +133,7 @@ typedef enum {
   ND_GVAR_DEF, // グローバル変数の定義
   ND_GVAR, // グローバル変数の使用
   ND_STRING, // 文字列
+  ND_MEMBER,
   ND_NUM,
 } NodeKind;
 
@@ -150,7 +152,8 @@ struct Node {
   char *varname; // only kind == ND_*VAR
   int size;      // only kind == ND_*VAR
   StringToken *string; // only kind == ND_STRING
-  LVar *var;           // only kind = ND_*VAR_DEF
+  LVar *var;           // only kind == ND_GVAR_DEF
+  Member *member; // only kind == ND_MEMBER
 };
 
 extern Node *code[];
@@ -180,6 +183,7 @@ LVar *find_variable(Token *tok);
 Type *define_struct();
 void read_type(Define *def);
 int get_size(Type *type);
+Member *find_member(Token *token, Type* type);
 
 void gen_val(Node *node);
 void gen(Node *node);

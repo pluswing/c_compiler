@@ -91,6 +91,7 @@ Type *define_struct() {
   expect("{");
   Type *t = calloc(1, sizeof(Type));
   t->ty = STRUCT;
+  int offset = 0;
   while(!consume("}")) {
     Define *def = read_define();
     read_type(def);
@@ -99,15 +100,14 @@ Type *define_struct() {
     m->name = calloc(100, sizeof(char));
     memcpy(m->name, def->ident->str, def->ident->len);
     m->ty = def->type;
+    m->offset = offset;
     // TODO 配列の場合は、別途計算必要
-    if (t->members) {
-      m->offset = t->members->offset + get_size(def->type);
-    } else {
-      m->offset = get_size(def->type);
-    }
+    offset += get_size(def->type);
     m->next = t->members;
     t->members = m;
   }
+  // sizeを使うようにする
+  t->size = offset;
   // expect(";");
   return t;
 }
@@ -643,12 +643,31 @@ Node *variable(Token *tok) {
     node->lhs = add;
     expect("]");
   }
-/*
-  node->kind = ND_MEMBER;
-  node->lhs = node;
-  node->members = find_member(...); // a
-*/
+
+  while(consume(".")) {
+    Node *member = calloc(1, sizeof(Node));
+    member->kind = ND_MEMBER;
+    member->lhs = node;
+    member->member = find_member(consume_kind(TK_IDENT), node->type);
+    // TODO ネストするときに必要。
+    // member->type = member->member;
+    node = member;
+  }
   return node;
+}
+
+Member *find_member(Token *token, Type* type) {
+  if (!token) {
+    error("member ident not found");
+  }
+  char name[100];
+  memcpy(name, token->str, token->len);
+  for (Member *m = type->members; m; m = m->next) {
+    if (strcmp(name, m->name) == 0) {
+      return m;
+    }
+  }
+  error("member not found");
 }
 
 

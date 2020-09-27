@@ -12,6 +12,11 @@ void gen_val(Node *node) {
     printf("  push rax\n");
   } else if (node->kind == ND_GVAR) {
     printf("  push offset %s\n", node->varname);
+  } else if (node->kind == ND_MEMBER) {
+    gen_val(node->lhs);
+    printf("  pop rax\n");
+    printf("  add rax, %d\n", node->member->offset);
+    printf("  push rax\n");
   } else {
     error("not VARIABLE");
   }
@@ -192,6 +197,7 @@ void gen(Node *node) {
   case ND_NUM:
     printf("  push %d\n", node->val);
     return;
+  case ND_MEMBER:
   case ND_LVAR:
   case ND_GVAR:
     gen_val(node);
