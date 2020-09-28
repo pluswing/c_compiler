@@ -328,9 +328,12 @@ int test_local_variable_init() {
 }
 
 int test_struct() {
-  struct {int a; int b;} abc;
+  // TODO ちょっと足りてない？
+  struct {int a; int b; int c;} abc;
   abc.a = 10;
+  abc.b = 20;
   assert(10, abc.a);
+  assert(20, abc.b);
 }
 
 int main() {

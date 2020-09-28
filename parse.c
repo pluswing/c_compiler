@@ -101,12 +101,10 @@ Type *define_struct() {
     memcpy(m->name, def->ident->str, def->ident->len);
     m->ty = def->type;
     m->offset = offset;
-    // TODO 配列の場合は、別途計算必要
     offset += get_size(def->type);
     m->next = t->members;
     t->members = m;
   }
-  // sizeを使うようにする
   t->size = offset;
   // expect(";");
   return t;
@@ -530,13 +528,22 @@ void read_type(Define *def) {
 }
 
 int get_size(Type *type) {
+  if (type->ty == STRUCT) {
+    return type->size;
+  }
+  if (type->ty == ARRAY) {
+    if (type->array_size == 0) {
+      error("undefined array size.");
+    }
+    return get_size(type->ptr_to) * type->array_size;
+  }
+  // TODO sizeをそれぞれ入れておくとこの記述は不要になる。あとでやる
   return type->ty == PTR ? 8 : type->ty == CHAR ? 1 : 4;
 }
 
 Node *define_variable(Define *def, LVar **varlist) {
   read_type(def);
   Type *type = def->type;
-  int size = get_size(type);
   Node *node = calloc(1, sizeof(Node));
   node->varname = calloc(100, sizeof(char));
   memcpy(node->varname, def->ident->str, def->ident->len);
@@ -582,13 +589,7 @@ Node *define_variable(Define *def, LVar **varlist) {
     }
   }
 
-  if (type->ty == ARRAY) {
-    if (type->array_size == 0) {
-      error("undefined array size: %s", node->varname);
-    }
-    size *= type->array_size;
-  }
-  node->size = size;
+  node->size = get_size(type);
 
   LVar *lvar = find_variable(def->ident);
   if (lvar != NULL) {
@@ -602,9 +603,9 @@ Node *define_variable(Define *def, LVar **varlist) {
   lvar->len = def->ident->len;
   lvar->init = init;
   if (varlist[cur_func] == NULL) {
-    lvar->offset = size;
+    lvar->offset = node->size;
   } else {
-    lvar->offset = varlist[cur_func]->offset + size;
+    lvar->offset = varlist[cur_func]->offset + node->size;
   }
   lvar->type = type;
   node->offset = lvar->offset;
@@ -649,8 +650,7 @@ Node *variable(Token *tok) {
     member->kind = ND_MEMBER;
     member->lhs = node;
     member->member = find_member(consume_kind(TK_IDENT), node->type);
-    // TODO ネストするときに必要。
-    // member->type = member->member;
+    member->type = member->member->ty;
     node = member;
   }
   return node;
