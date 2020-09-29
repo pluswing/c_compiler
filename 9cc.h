@@ -184,6 +184,7 @@ Type *define_struct();
 void read_type(Define *def);
 int get_size(Type *type);
 Member *find_member(Token *token, Type* type);
+int align_to(int n, int align);
 
 void gen_val(Node *node);
 void gen(Node *node);

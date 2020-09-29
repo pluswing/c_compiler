@@ -92,6 +92,7 @@ Type *define_struct() {
   Type *t = calloc(1, sizeof(Type));
   t->ty = STRUCT;
   int offset = 0;
+  int maxSize = 0;
   while(!consume("}")) {
     Define *def = read_define();
     read_type(def);
@@ -100,12 +101,17 @@ Type *define_struct() {
     m->name = calloc(100, sizeof(char));
     memcpy(m->name, def->ident->str, def->ident->len);
     m->ty = def->type;
+    int size = get_size(def->type);
+    offset = align_to(offset, size);
     m->offset = offset;
-    offset += get_size(def->type);
+    offset += size;
     m->next = t->members;
     t->members = m;
+    if (maxSize <= 8 && maxSize < size) {
+      maxSize = size;
+    }
   }
-  t->size = offset;
+  t->size = align_to(offset, maxSize);
   // expect(";");
   return t;
 }
@@ -685,4 +691,8 @@ LVar *find_variable(Token *tok) {
     }
   }
   return NULL;
+}
+
+int align_to(int n, int align) {
+  return (n + align - 1) & ~(align - 1);
 }
