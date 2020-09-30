@@ -5,7 +5,7 @@ LVar *globals[100];
 int cur_func = 0;
 StringToken *strings;
 int struct_def_index = 0;
-Type *structs[100];
+Tag *tags;
 
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
@@ -40,7 +40,11 @@ Node *code[100];
 void program() {
   int i = 0;
   while(!at_eof()) {
-    code[i++] = func();
+    Node *n = func();
+    if (!n) {
+      continue;
+    }
+    code[i++] = n;
   }
   code[i] = NULL;
 }
@@ -48,13 +52,13 @@ void program() {
 // func = "int" ident "(" ("int" ident ("," "int" ident)*)? ")" stmt
 Node *func() {
   Node *node;
-/*
+
   Type *t = define_struct();
   if (t) {
-    structs[struct_def_index++] = t;
+    expect(";");
     return NULL;
   }
-*/
+
   Define *def = read_define();
 
   if (consume("(")) {
@@ -87,7 +91,7 @@ Type *define_struct() {
   if (!consume_kind(TK_STRUCT)) {
     return NULL;
   }
-  // Token *name = consume_kind(TK_IDENT);
+  Token *name = consume_kind(TK_IDENT);
   expect("{");
   Type *t = calloc(1, sizeof(Type));
   t->ty = STRUCT;
@@ -112,7 +116,13 @@ Type *define_struct() {
     }
   }
   t->size = align_to(offset, maxSize);
-  // expect(";");
+
+  if (name) {
+    // TODO structをprefixにつける。
+    char *name_str = calloc(name->len, sizeof(char));
+    memcpy(name_str, name->str, name->len);
+    push_tag(name_str, t);
+  }
   return t;
 }
 
@@ -695,4 +705,14 @@ LVar *find_variable(Token *tok) {
 
 int align_to(int n, int align) {
   return (n + align - 1) & ~(align - 1);
+}
+
+void push_tag(char *name, Type *type) {
+  Tag *tag = calloc(1, sizeof(Tag));
+  tag->name = name;
+  tag->type = type;
+  if (tags) {
+    tag->next = tags;
+  }
+  tags = tag;
 }

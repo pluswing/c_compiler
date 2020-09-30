@@ -8,6 +8,12 @@ char g_msg2[4] = "bar";
 // TODO これたぶん未対応
 //char *a[] = {"abc", "def"};
 
+struct Hoge {
+  int a;
+  char b;
+  int c;
+};
+
 int assert(int expected, int actual) {
 
   if (expected == actual) {
@@ -335,6 +341,10 @@ int test_struct() {
   assert(20, abc.b);
 
   struct {int a; char b; int c;} ccc;
+  int size = &ccc.c - &ccc.a;
+  assert(8, size);
+  // TODO sizeof(struct型)が未対応
+  // TODO sizeof(型)が未対応
 }
 
 int main() {

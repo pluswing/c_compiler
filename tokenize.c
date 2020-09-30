@@ -210,7 +210,7 @@ Token *tokenize() {
       continue;
     }
 
-    if ('a' <= *p && *p <= 'z') {
+    if ('a' <= *p && *p <= 'z' || 'A' <= *p && *p <= 'Z') {
       char *c = p;
       while(is_alnum(*c)) {
         c++;

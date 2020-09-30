@@ -86,6 +86,13 @@ struct StringToken {
   StringToken *next;
 };
 
+typedef struct Tag Tag;
+struct Tag {
+  Tag *next;
+  char *name;
+  Type *type;
+};
+
 extern Token *token;
 extern char *user_input;
 extern char *filename;
@@ -93,6 +100,7 @@ extern char *filename;
 extern LVar *locals[];
 extern LVar *globals[];
 extern int cur_func;
+extern Tag *tags;
 
 char *read_file(char *path);
 void error(char *fmt, ...);
@@ -185,6 +193,7 @@ void read_type(Define *def);
 int get_size(Type *type);
 Member *find_member(Token *token, Type* type);
 int align_to(int n, int align);
+void push_tag(char *name, Type *type);
 
 void gen_val(Node *node);
 void gen(Node *node);
