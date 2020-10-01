@@ -92,6 +92,13 @@ Type *define_struct() {
     return NULL;
   }
   Token *name = consume_kind(TK_IDENT);
+  if (name && !peek("{")) {
+    Tag *tag = find_tag("struct", name);
+    if (!tag) {
+      error("type not found.");
+    }
+    return tag->type;
+  }
   expect("{");
   Type *t = calloc(1, sizeof(Type));
   t->ty = STRUCT;
@@ -119,8 +126,9 @@ Type *define_struct() {
 
   if (name) {
     // TODO structをprefixにつける。
-    char *name_str = calloc(name->len, sizeof(char));
-    memcpy(name_str, name->str, name->len);
+    char *name_str = calloc(name->len + 7, sizeof(char));
+    memcpy(name_str, "struct ", 7);
+    memcpy(name_str + 7, name->str, name->len);
     push_tag(name_str, t);
   }
   return t;
@@ -715,4 +723,21 @@ void push_tag(char *name, Type *type) {
     tag->next = tags;
   }
   tags = tag;
+}
+
+Tag *find_tag(char *prefix, Token *token) {
+  char name[100] = {0};
+  if (prefix) {
+    memcpy(name, prefix, strlen(prefix));
+    memcpy(name + strlen(prefix), " ", 1);
+    memcpy(name + strlen(prefix) + 1, token->str, token->len);
+  } else {
+    memcpy(name, token->str, token->len);
+  }
+  for (Tag *tag = tags; tag; tag = tag->next) {
+    if (strcmp(name, tag->name) == 0) {
+      return tag;
+    }
+  }
+  return NULL;
 }

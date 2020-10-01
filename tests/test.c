@@ -340,9 +340,13 @@ int test_struct() {
   assert(10, abc.a);
   assert(20, abc.b);
 
-  struct {int a; char b; int c;} ccc;
+  struct StTest {int a; char b; int c;} ccc;
   int size = &ccc.c - &ccc.a;
   assert(8, size);
+
+  struct StTest ccc2;
+  int size2 = &ccc2.c - &ccc2.a;
+  assert(8, size2);
   // TODO sizeof(struct型)が未対応
   // TODO sizeof(型)が未対応
 }

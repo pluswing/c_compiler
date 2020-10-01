@@ -78,6 +78,12 @@ bool consume(char *op) {
   return true;
 }
 
+bool peek(char *op) {
+  return strlen(op) == token->len &&
+      memcmp(token->str, op, token->len) == 0;
+}
+
+
 Token* consume_kind(TokenKind kind) {
   if (token->kind != kind) {
     return NULL;

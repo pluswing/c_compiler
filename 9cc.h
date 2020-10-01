@@ -106,6 +106,7 @@ char *read_file(char *path);
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 bool consume(char *op);
+bool peek(char *op);
 Token *consume_kind(TokenKind kind);
 void expect(char *op);
 int expect_number();
@@ -194,6 +195,7 @@ int get_size(Type *type);
 Member *find_member(Token *token, Type* type);
 int align_to(int n, int align);
 void push_tag(char *name, Type *type);
+Tag *find_tag(char *prefix, Token *token);
 
 void gen_val(Node *node);
 void gen(Node *node);
