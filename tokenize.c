@@ -189,7 +189,8 @@ Token *tokenize() {
     if (startswith(p, "==") ||
         startswith(p, "!=") ||
         startswith(p, "<=") ||
-        startswith(p, ">=")) {
+        startswith(p, ">=") ||
+        startswith(p, "->")) {
 
       cur = new_token(TK_RESRVED, cur, p, 2);
       p += 2;

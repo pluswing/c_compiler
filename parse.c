@@ -125,11 +125,7 @@ Type *define_struct() {
   t->size = align_to(offset, maxSize);
 
   if (name) {
-    // TODO structをprefixにつける。
-    char *name_str = calloc(name->len + 7, sizeof(char));
-    memcpy(name_str, "struct ", 7);
-    memcpy(name_str + 7, name->str, name->len);
-    push_tag(name_str, t);
+    push_tag("struct", name, t);
   }
   return t;
 }
@@ -654,35 +650,56 @@ Node *variable(Token *tok) {
   node->offset = lvar->offset;
   node->type = lvar->type;
 
-  while (consume("[")) {
-    Node *add = calloc(1, sizeof(Node));
-    add->kind = ND_ADD;
-    add->lhs = node;
-    if (node->type && node->type->ty != INT) {
-      int n = node->type->ptr_to->ty == INT ? 4
-            : node->type->ptr_to->ty == CHAR ? 1 : 8;
-      add->rhs = new_binary(ND_MUL, expr(), new_node_num(n));
+  while(true) {
+    if (consume("[")) {
+      Node *add = calloc(1, sizeof(Node));
+      add->kind = ND_ADD;
+      add->lhs = node;
+      if (node->type && node->type->ty != INT) {
+        int n = node->type->ptr_to->ty == INT ? 4
+              : node->type->ptr_to->ty == CHAR ? 1 : 8;
+        add->rhs = new_binary(ND_MUL, expr(), new_node_num(n));
+      }
+      node = calloc(1, sizeof(Node));
+      node->kind = ND_DEREF;
+      node->lhs = add;
+      expect("]");
+      continue;
     }
-    node = calloc(1, sizeof(Node));
-    node->kind = ND_DEREF;
-    node->lhs = add;
-    expect("]");
-  }
 
-  while(consume(".")) {
-    Node *member = calloc(1, sizeof(Node));
-    member->kind = ND_MEMBER;
-    member->lhs = node;
-    member->member = find_member(consume_kind(TK_IDENT), node->type);
-    member->type = member->member->ty;
-    node = member;
+    if (consume(".")) {
+      node = struct_ref(node);
+      continue;
+    }
+
+    if (consume("->")) {
+      // x->y is short for (*x).y
+      Type *t = node->type->ptr_to;
+      node = new_binary(ND_DEREF, node, NULL);
+      node->type = t;
+      node = struct_ref(node);
+      continue;
+    }
+    break;
   }
   return node;
+}
+
+Node *struct_ref(Node *node) {
+  Node *member = calloc(1, sizeof(Node));
+  member->kind = ND_MEMBER;
+  member->lhs = node;
+  member->member = find_member(consume_kind(TK_IDENT), node->type);
+  member->type = member->member->ty;
+  return member;
 }
 
 Member *find_member(Token *token, Type* type) {
   if (!token) {
     error("member ident not found");
+  }
+  if (!type) {
+    error("member type not found");
   }
   char name[100];
   memcpy(name, token->str, token->len);
@@ -715,7 +732,15 @@ int align_to(int n, int align) {
   return (n + align - 1) & ~(align - 1);
 }
 
-void push_tag(char *name, Type *type) {
+void push_tag(char *prefix, Token *token, Type *type) {
+  char name[100] = {0};
+  if (prefix) {
+    memcpy(name, prefix, strlen(prefix));
+    memcpy(name + strlen(prefix), " ", 1);
+    memcpy(name + strlen(prefix) + 1, token->str, token->len);
+  } else {
+    memcpy(name, token->str, token->len);
+  }
   Tag *tag = calloc(1, sizeof(Tag));
   tag->name = name;
   tag->type = type;

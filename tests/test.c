@@ -347,6 +347,11 @@ int test_struct() {
   struct StTest ccc2;
   int size2 = &ccc2.c - &ccc2.a;
   assert(8, size2);
+
+  ccc2.a = 7;
+  struct StTest *ptr = &ccc2;
+  assert(7, ptr->a);
+
   // TODO sizeof(struct型)が未対応
   // TODO sizeof(型)が未対応
 }

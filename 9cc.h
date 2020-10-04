@@ -194,8 +194,9 @@ void read_type(Define *def);
 int get_size(Type *type);
 Member *find_member(Token *token, Type* type);
 int align_to(int n, int align);
-void push_tag(char *name, Type *type);
+void push_tag(char *prefix, Token *token, Type *type);
 Tag *find_tag(char *prefix, Token *token);
+Node *struct_ref(Node *node);
 
 void gen_val(Node *node);
 void gen(Node *node);
