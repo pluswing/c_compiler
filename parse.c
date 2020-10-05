@@ -53,6 +53,10 @@ void program() {
 Node *func() {
   Node *node;
 
+  if (define_typedef()) {
+    return NULL;
+  }
+
   Type *t = define_struct();
   if (t) {
     expect(";");
@@ -85,6 +89,16 @@ Node *func() {
     expect(";");
     return node;
   }
+}
+
+bool define_typedef() {
+  if (!consume_kind(TK_TYPEDEF)) {
+    return false;
+  }
+  Define *def = read_define();
+  expect(";");
+  push_tag(NULL, def->ident, def->type);
+  return true;
 }
 
 Type *define_struct() {
@@ -733,7 +747,7 @@ int align_to(int n, int align) {
 }
 
 void push_tag(char *prefix, Token *token, Type *type) {
-  char name[100] = {0};
+  char *name = calloc(100, sizeof(char));
   if (prefix) {
     memcpy(name, prefix, strlen(prefix));
     memcpy(name + strlen(prefix), " ", 1);

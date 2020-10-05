@@ -14,6 +14,9 @@ struct Hoge {
   int c;
 };
 
+typedef int Int;
+typedef char* String;
+
 int assert(int expected, int actual) {
 
   if (expected == actual) {
@@ -354,6 +357,13 @@ int test_struct() {
 
   // TODO sizeof(struct型)が未対応
   // TODO sizeof(型)が未対応
+}
+
+int test_typedef() {
+  String a = "aaa";
+  Int b;
+  b = 10;
+  assert(10, b);
 }
 
 int main() {

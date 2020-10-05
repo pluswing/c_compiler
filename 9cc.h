@@ -20,6 +20,7 @@ typedef enum {
   TK_SIZEOF, // sizeof
   TK_STRING, // 文字列
   TK_STRUCT, // 構造体
+  TK_TYPEDEF, // typedef
   TK_EOF, // 入力の終わりを表すトークン
 } TokenKind;
 
@@ -197,6 +198,7 @@ int align_to(int n, int align);
 void push_tag(char *prefix, Token *token, Type *type);
 Tag *find_tag(char *prefix, Token *token);
 Node *struct_ref(Node *node);
+bool define_typedef();
 
 void gen_val(Node *node);
 void gen(Node *node);
