@@ -92,6 +92,7 @@ Node *func() {
 }
 
 bool define_typedef() {
+  // TODO 型定義が出てくる前のtypedefはたぶんうまくいかない
   if (!consume_kind(TK_TYPEDEF)) {
     return false;
   }
@@ -146,17 +147,30 @@ Type *define_struct() {
 
 // 関数か変数の定義の前半部分を読んで、LVarに詰める
 Define *read_define() {
-  Type *type = define_struct();
-  if (!type) {
-    Token *typeToken = consume_kind(TK_TYPE);
-    if (!typeToken) {
-      return NULL;
+  Type *type = NULL;
+  Token *t = token;
+  Token *ident = consume_kind(TK_IDENT);
+  if (ident) {
+    Tag *tag = find_tag(NULL, ident);
+    if (tag) {
+      type = tag->type;
+    } else {
+      token = t;
     }
+  }
+  if (!type) {
+    type = define_struct();
+    if (!type) {
+      Token *typeToken = consume_kind(TK_TYPE);
+      if (!typeToken) {
+        return NULL;
+      }
 
-    type = calloc(1, sizeof(Type));
-    int isChar = memcmp("char", typeToken->str, typeToken->len) == 0;
-    type->ty = isChar ? CHAR : INT;
-    type->ptr_to = NULL;
+      type = calloc(1, sizeof(Type));
+      int isChar = memcmp("char", typeToken->str, typeToken->len) == 0;
+      type->ty = isChar ? CHAR : INT;
+      type->ptr_to = NULL;
+    }
   }
 
   while(consume("*")) {

@@ -16,6 +16,7 @@ struct Hoge {
 
 typedef int Int;
 typedef char* String;
+String strtest = "cccc";
 
 int assert(int expected, int actual) {
 
@@ -360,7 +361,6 @@ int test_struct() {
 }
 
 int test_typedef() {
-  String a = "aaa";
   Int b;
   b = 10;
   assert(10, b);
@@ -391,6 +391,7 @@ int main() {
   test_gloval_variable_init();
   test_local_variable_init();
   test_struct();
+  test_typedef();
 
   printf("OK\n");
   return 0;
