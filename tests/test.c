@@ -17,6 +17,7 @@ struct Hoge {
 typedef int Int;
 typedef char* String;
 String strtest = "cccc";
+typedef struct Hoge StructHoge;
 
 int assert(int expected, int actual) {
 
@@ -364,6 +365,13 @@ int test_typedef() {
   Int b;
   b = 10;
   assert(10, b);
+
+  // struct Hoge hoge;
+  StructHoge hoge;
+  hoge.a = 10;
+  hoge.b = 20;
+  assert(10, hoge.a);
+  assert(20, hoge.b);
 }
 
 int main() {
