@@ -19,6 +19,12 @@ typedef char* String;
 String strtest = "cccc";
 typedef struct Hoge StructHoge;
 
+enum HogeEnum {
+  AAA = 10,
+  BBB,
+  CCC
+};
+
 int assert(int expected, int actual) {
 
   if (expected == actual) {

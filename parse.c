@@ -52,12 +52,19 @@ void program() {
 // func = "int" ident "(" ("int" ident ("," "int" ident)*)? ")" stmt
 Node *func() {
   Node *node;
+  Type *t = NULL;
 
   if (define_typedef()) {
     return NULL;
   }
 
-  Type *t = define_struct();
+  t = define_enum();
+  if (t) {
+    expect(";");
+    return NULL;
+  }
+
+  t = define_struct();
   if (t) {
     expect(";");
     return NULL;
@@ -89,6 +96,52 @@ Node *func() {
     expect(";");
     return node;
   }
+}
+
+Type *define_enum() {
+  if (!consume_kind(TK_ENUM)) {
+    return NULL;
+  }
+  Token *name = consume_kind(TK_IDENT);
+  if (name && !peek("{")) {
+    Tag *tag = find_tag("enum", name);
+    if (!tag) {
+      error("type not found.");
+    }
+    return tag->type;
+  }
+
+  expect("{");
+  int num = 0;
+  while(true) {
+    Token *n = consume_kind(TK_IDENT);
+    if (consume("=")) {
+      num = expect_number();
+    }
+
+    // グローバル変数として登録
+    Define *d = calloc(1, sizeof(Define));
+    d->ident = n;
+    d->type = int_type();
+    // define_variable(d, globals);
+
+    if (consume("}")) {
+      break;
+    }
+    expect(",");
+  }
+
+  if (name) {
+    push_tag("enum", name, int_type());
+  }
+  return int_type();
+}
+
+Type *int_type() {
+  Type *t = calloc(1, sizeof(Type));
+  t->ty = INT;
+  t->size = 4;
+  return t;
 }
 
 bool define_typedef() {

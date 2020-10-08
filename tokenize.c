@@ -153,6 +153,7 @@ ReservedWord reservedWords[] = {
   {"sizeof", TK_SIZEOF},
   {"struct", TK_STRUCT},
   {"typedef", TK_TYPEDEF},
+  {"enum", TK_ENUM},
   {"", TK_EOF},
 };
 
