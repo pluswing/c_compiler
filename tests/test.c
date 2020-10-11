@@ -380,6 +380,19 @@ int test_typedef() {
   assert(20, hoge.b);
 }
 
+int test_enum() {
+  enum HogeEnum2 {
+    AAA = 10,
+    BBB,
+    CCC
+  } aa;
+  enum HogeEnum2 hoge;
+  hoge = AAA;
+  assert(10, hoge);
+  assert(11, BBB);
+  assert(12, CCC);
+}
+
 int main() {
 
   test_calc();
@@ -406,6 +419,7 @@ int main() {
   test_local_variable_init();
   test_struct();
   test_typedef();
+  test_enum();
 
   printf("OK\n");
   return 0;

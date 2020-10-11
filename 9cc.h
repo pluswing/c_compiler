@@ -95,6 +95,13 @@ struct Tag {
   Type *type;
 };
 
+typedef struct EnumVar EnumVar;
+struct EnumVar {
+  EnumVar *next;
+  char *name;
+  int value;
+};
+
 extern Token *token;
 extern char *user_input;
 extern char *filename;
@@ -103,6 +110,7 @@ extern LVar *locals[];
 extern LVar *globals[];
 extern int cur_func;
 extern Tag *tags;
+extern EnumVar *enum_vars;
 
 char *read_file(char *path);
 void error(char *fmt, ...);
@@ -202,6 +210,7 @@ Node *struct_ref(Node *node);
 bool define_typedef();
 Type *define_enum();
 Type *int_type();
+Node *find_enum_var(Token *tok);
 
 void gen_val(Node *node);
 void gen(Node *node);

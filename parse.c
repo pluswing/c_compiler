@@ -6,6 +6,7 @@ int cur_func = 0;
 StringToken *strings;
 int struct_def_index = 0;
 Tag *tags;
+EnumVar *enum_vars;
 
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
@@ -117,13 +118,16 @@ Type *define_enum() {
     Token *n = consume_kind(TK_IDENT);
     if (consume("=")) {
       num = expect_number();
+    } else {
+      num += 1;
     }
 
-    // グローバル変数として登録
-    Define *d = calloc(1, sizeof(Define));
-    d->ident = n;
-    d->type = int_type();
-    // define_variable(d, globals);
+    EnumVar *e = calloc(1, sizeof(EnumVar));
+    e->name = calloc(100, sizeof(char));
+    memcpy(e->name, n->str, n->len);
+    e->value = num;
+    e->next = enum_vars;
+    enum_vars = e;
 
     if (consume("}")) {
       break;
@@ -213,17 +217,20 @@ Define *read_define() {
   }
   if (!type) {
     type = define_struct();
-    if (!type) {
-      Token *typeToken = consume_kind(TK_TYPE);
-      if (!typeToken) {
-        return NULL;
-      }
-
-      type = calloc(1, sizeof(Type));
-      int isChar = memcmp("char", typeToken->str, typeToken->len) == 0;
-      type->ty = isChar ? CHAR : INT;
-      type->ptr_to = NULL;
+  }
+  if (!type) {
+    type = define_enum();
+  }
+  if (!type) {
+    Token *typeToken = consume_kind(TK_TYPE);
+    if (!typeToken) {
+      return NULL;
     }
+
+    type = calloc(1, sizeof(Type));
+    int isChar = memcmp("char", typeToken->str, typeToken->len) == 0;
+    type->ty = isChar ? CHAR : INT;
+    type->ptr_to = NULL;
   }
 
   while(consume("*")) {
@@ -510,6 +517,11 @@ Node *primary() {
       }
       return node;
     }
+    Node *num = find_enum_var(tok);
+    if (num) {
+      return num;
+    }
+
     // 関数呼び出しではない場合、変数。
     return variable(tok);
   }
@@ -843,6 +855,17 @@ Tag *find_tag(char *prefix, Token *token) {
   for (Tag *tag = tags; tag; tag = tag->next) {
     if (strcmp(name, tag->name) == 0) {
       return tag;
+    }
+  }
+  return NULL;
+}
+
+Node *find_enum_var(Token *tok) {
+  char name[100] = {0};
+  memcpy(name, tok->str, tok->len);
+  for (EnumVar *e = enum_vars; e; e = e->next) {
+    if (strcmp(name, e->name) == 0) {
+      return new_node_num(e->value);
     }
   }
   return NULL;
