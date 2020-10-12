@@ -338,6 +338,13 @@ Node *stmt() {
     return node;
   }
 
+  if (consume_kind(TK_BREAK)) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_BREAK;
+    expect(";");
+    return node;
+  }
+
   Define *def = read_define();
   if (def) {
     node = define_variable(def, locals);

@@ -154,6 +154,7 @@ ReservedWord reservedWords[] = {
   {"struct", TK_STRUCT},
   {"typedef", TK_TYPEDEF},
   {"enum", TK_ENUM},
+  {"break", TK_BREAK},
   {"", TK_EOF},
 };
 

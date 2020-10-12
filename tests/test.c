@@ -393,6 +393,34 @@ int test_enum() {
   assert(12, CCC);
 }
 
+int test_break() {
+  int i = 0;
+  for(;;) {
+    i = i + 1;
+    if (i == 3) {
+      break;
+    }
+  }
+  assert(3, i);
+
+  i = 0;
+  for (;;) {
+    int j = 0;
+    i = i + 1;
+    while(i) {
+      j = j + 1;
+      if (j == 2) {
+        break;
+      }
+    }
+    assert(2, j);
+    if (i == 3) {
+      break;
+    }
+  }
+  assert(3, i);
+}
+
 int main() {
 
   test_calc();
@@ -420,6 +448,7 @@ int main() {
   test_struct();
   test_typedef();
   test_enum();
+  test_break();
 
   printf("OK\n");
   return 0;

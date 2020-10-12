@@ -28,12 +28,15 @@ static char *argreg2[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static char *argreg4[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *argreg8[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
+int breakId = 0;
+
 void gen(Node *node) {
   if (!node) return;
   genCounter += 1;
   int id = genCounter;
   int argCount = 0;
   Type *t;
+  int bid = 0;
 
   switch (node->kind) {
   case ND_STRING:
@@ -146,6 +149,8 @@ void gen(Node *node) {
     }
     return;
   case ND_FOR:
+    bid = breakId;
+    breakId = id;
     gen(node->lhs->lhs);
     printf(".Lbegin%03d:\n", id);
     gen(node->lhs->rhs);
@@ -159,8 +164,11 @@ void gen(Node *node) {
     gen(node->rhs->lhs);
     printf("  jmp .Lbegin%03d\n", id);
     printf(".Lend%03d:\n", id);
+    breakId = bid;
     return;
   case ND_WHILE:
+    bid = breakId;
+    breakId = id;
     printf(".Lbegin%03d:\n", id);
     gen(node->lhs);
     printf("  pop rax\n");
@@ -169,6 +177,13 @@ void gen(Node *node) {
     gen(node->rhs);
     printf("  jmp .Lbegin%03d\n", id);
     printf(".Lend%03d:\n", id);
+    breakId = bid;
+    return;
+  case ND_BREAK:
+    if (breakId == 0) {
+      error("stray break");
+    }
+    printf("  jmp .Lend%03d\n", breakId);
     return;
   case ND_IF:
     gen(node->lhs);
