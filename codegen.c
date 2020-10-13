@@ -29,6 +29,7 @@ static char *argreg4[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *argreg8[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 int breakId = 0;
+int continueId = 0;
 
 void gen(Node *node) {
   if (!node) return;
@@ -37,6 +38,7 @@ void gen(Node *node) {
   int argCount = 0;
   Type *t;
   int bid = 0;
+  int cid = 0;
 
   switch (node->kind) {
   case ND_STRING:
@@ -151,39 +153,59 @@ void gen(Node *node) {
   case ND_FOR:
     bid = breakId;
     breakId = id;
-    gen(node->lhs->lhs);
+    cid = continueId;
+    continueId = id;
+    // for (A; B; C) {
+    //   D;
+    // }
+    gen(node->lhs->lhs); // A
     printf(".Lbegin%03d:\n", id);
-    gen(node->lhs->rhs);
+    printf(".Lcontinue%03d:\n", id);
+    gen(node->lhs->rhs); // B
     if (!node->lhs->rhs) {
       printf("  push 1\n");
     }
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     printf("  je .Lend%03d\n", id);
-    gen(node->rhs->rhs);
-    gen(node->rhs->lhs);
+    gen(node->rhs->rhs); // C
+    gen(node->rhs->lhs); // D
     printf("  jmp .Lbegin%03d\n", id);
     printf(".Lend%03d:\n", id);
     breakId = bid;
+    continueId = cid;
     return;
   case ND_WHILE:
     bid = breakId;
     breakId = id;
+    cid = continueId;
+    continueId = id;
+    // while (A) {
+    //  B;
+    // }
     printf(".Lbegin%03d:\n", id);
-    gen(node->lhs);
+    printf(".Lcontinue%03d:\n", id);
+    gen(node->lhs); // A
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     printf("  je .Lend%03d\n", id);
-    gen(node->rhs);
+    gen(node->rhs); // B
     printf("  jmp .Lbegin%03d\n", id);
     printf(".Lend%03d:\n", id);
     breakId = bid;
+    continueId = cid;
     return;
   case ND_BREAK:
     if (breakId == 0) {
       error("stray break");
     }
     printf("  jmp .Lend%03d\n", breakId);
+    return;
+  case ND_CONTINUE:
+    if (continueId == 0) {
+      error("stray continue");
+    }
+    printf("  jmp .Lcontinue%03d\n", continueId);
     return;
   case ND_IF:
     gen(node->lhs);

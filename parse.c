@@ -345,6 +345,13 @@ Node *stmt() {
     return node;
   }
 
+  if (consume_kind(TK_CONTINUE)) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_CONTINUE;
+    expect(";");
+    return node;
+  }
+
   Define *def = read_define();
   if (def) {
     node = define_variable(def, locals);

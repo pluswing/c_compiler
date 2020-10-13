@@ -421,6 +421,20 @@ int test_break() {
   assert(3, i);
 }
 
+int test_continue() {
+  int i = 0;
+  int j = 0;
+  while(i < 10) {
+    i = i + 1;
+    if (i > 5) {
+      continue;
+    }
+    j = j + 1;
+  }
+  assert(10, i);
+  assert(5, j);
+}
+
 int main() {
 
   test_calc();
@@ -449,6 +463,7 @@ int main() {
   test_typedef();
   test_enum();
   test_break();
+  test_continue();
 
   printf("OK\n");
   return 0;

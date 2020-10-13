@@ -23,6 +23,7 @@ typedef enum {
   TK_TYPEDEF, // typedef
   TK_ENUM, // enum
   TK_BREAK, // break
+  TK_CONTINUE, // continue
   TK_EOF, // 入力の終わりを表すトークン
 } TokenKind;
 
@@ -155,6 +156,7 @@ typedef enum {
   ND_STRING, // 文字列
   ND_MEMBER,
   ND_BREAK, // break
+  ND_CONTINUE, // continue
   ND_NUM,
 } NodeKind;
 

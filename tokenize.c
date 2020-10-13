@@ -155,6 +155,7 @@ ReservedWord reservedWords[] = {
   {"typedef", TK_TYPEDEF},
   {"enum", TK_ENUM},
   {"break", TK_BREAK},
+  {"continue", TK_CONTINUE},
   {"", TK_EOF},
 };
 
