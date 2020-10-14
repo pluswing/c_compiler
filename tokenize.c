@@ -194,6 +194,10 @@ Token *tokenize() {
         startswith(p, "!=") ||
         startswith(p, "<=") ||
         startswith(p, ">=") ||
+        startswith(p, "+=") ||
+        startswith(p, "-=") ||
+        startswith(p, "/=") ||
+        startswith(p, "*=") ||
         startswith(p, "->")) {
 
       cur = new_token(TK_RESRVED, cur, p, 2);

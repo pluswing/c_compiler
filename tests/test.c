@@ -433,6 +433,32 @@ int test_continue() {
   }
   assert(10, i);
   assert(5, j);
+
+  i = 0;
+  j = 0;
+  for(;i < 10;i = i + 1) {
+    if (i > 5) {
+      continue;
+    }
+    j = j + 1;
+  }
+  assert(10, i);
+  assert(5, j);
+}
+
+int test_addeq() {
+  int i = 2;
+  i += 5;
+  assert(7, i);
+
+  i -= 3;
+  assert(4, i);
+
+  i *= 2;
+  assert(8, i);
+
+  i /= 2;
+  assert(4, i);
 }
 
 int main() {
@@ -464,6 +490,7 @@ int main() {
   test_enum();
   test_break();
   test_continue();
+  test_addeq();
 
   printf("OK\n");
   return 0;

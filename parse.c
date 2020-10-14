@@ -376,6 +376,22 @@ Node *assign() {
   if (consume("=")) {
     node = new_binary(ND_ASSIGN, node, assign());
   }
+  if (consume("*=")) {
+    Node *mul = new_binary(ND_MUL, node, assign());
+    node = new_binary(ND_ASSIGN, node, mul);
+  }
+  if (consume("/=")) {
+    Node *div = new_binary(ND_DIV, node, assign());
+    node = new_binary(ND_ASSIGN, node, div);
+  }
+  if (consume("+=")) {
+    Node *add = new_binary(ND_ADD, node, assign());
+    node = new_binary(ND_ASSIGN, node, add);
+  }
+  if (consume("-=")) {
+    Node *sub = new_binary(ND_SUB, node, assign());
+    node = new_binary(ND_ASSIGN, node, sub);
+  }
   return node;
 }
 
