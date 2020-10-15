@@ -215,6 +215,7 @@ bool define_typedef();
 Type *define_enum();
 Type *int_type();
 Node *find_enum_var(Token *tok);
+Node *ptr_calc(Node* node, Node *r);
 
 void gen_val(Node *node);
 void gen(Node *node);

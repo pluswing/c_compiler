@@ -461,6 +461,16 @@ int test_addeq() {
   assert(4, i);
 }
 
+int test_addeq_ptr() {
+  int a[10] = {1,2,3,4,5};
+  int *ptr = &a;
+  assert(1, *ptr);
+  ptr += 4;
+  assert(5, *ptr);
+  ptr -= 3;
+  assert(2, *ptr);
+}
+
 int main() {
 
   test_calc();
@@ -491,6 +501,7 @@ int main() {
   test_break();
   test_continue();
   test_addeq();
+  test_addeq_ptr();
 
   printf("OK\n");
   return 0;

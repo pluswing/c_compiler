@@ -385,11 +385,11 @@ Node *assign() {
     node = new_binary(ND_ASSIGN, node, div);
   }
   if (consume("+=")) {
-    Node *add = new_binary(ND_ADD, node, assign());
+    Node *add = new_binary(ND_ADD, node, ptr_calc(node, assign()));
     node = new_binary(ND_ASSIGN, node, add);
   }
   if (consume("-=")) {
-    Node *sub = new_binary(ND_SUB, node, assign());
+    Node *sub = new_binary(ND_SUB, node, ptr_calc(node, assign()));
     node = new_binary(ND_ASSIGN, node, sub);
   }
   return node;
@@ -432,25 +432,22 @@ Node *add() {
   Node *node = mul();
   for (;;) {
     if (consume("+")) {
-      Node *r = mul();
-      if (node->type && node->type->ty != INT) {
-        int n = node->type->ptr_to->ty == INT ? 4
-              : node->type->ptr_to->ty == CHAR ? 1 : 8;
-        r = new_binary(ND_MUL, r, new_node_num(n));
-      }
-      node = new_binary(ND_ADD, node, r);
+      node = new_binary(ND_ADD, node, ptr_calc(node, mul()));
     } else if (consume("-")) {
-      Node *r = mul();
-      if (node->type && node->type->ty != INT) {
-        int n = node->type->ptr_to->ty == INT ? 4
-              : node->type->ptr_to->ty == CHAR ? 1 : 8;
-        r = new_binary(ND_MUL, r, new_node_num(n));
-      }
-      node = new_binary(ND_SUB, node, r);
+      node = new_binary(ND_SUB, node, ptr_calc(node, mul()));
     } else {
       return node;
     }
   }
+}
+
+Node *ptr_calc(Node* node, Node *r) {
+  if (node->type && node->type->ptr_to) {
+    int n = node->type->ptr_to->ty == INT ? 4
+          : node->type->ptr_to->ty == CHAR ? 1 : 8;
+    return new_binary(ND_MUL, r, new_node_num(n));
+  }
+  return r;
 }
 
 // mul        = unary ("*" unary | "/" unary)*
