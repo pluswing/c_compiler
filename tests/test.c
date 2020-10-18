@@ -471,6 +471,18 @@ int test_addeq_ptr() {
   assert(2, *ptr);
 }
 
+int test_pp() {
+  int a = 10;
+  assert(10, a++); // TODO
+  assert(11, a);
+  ++a;
+  assert(12, a);
+  assert(12, a--); // TODO
+  assert(11, a);
+  --a;
+  assert(10, a);
+}
+
 int main() {
 
   test_calc();
@@ -502,6 +514,7 @@ int main() {
   test_continue();
   test_addeq();
   test_addeq_ptr();
+  test_pp();
 
   printf("OK\n");
   return 0;

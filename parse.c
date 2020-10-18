@@ -482,6 +482,16 @@ Node *unary() {
   if (consume("&")) {
     return new_binary(ND_ADDR, unary(), NULL);
   }
+  if (consume("++")) {
+    Node *node = unary();
+    Node *add = new_binary(ND_ADD, node, new_node_num(1));
+    return new_binary(ND_ASSIGN, node, add);
+  }
+  if (consume("--")) {
+    Node *node = unary();
+    Node *sub = new_binary(ND_SUB, node, new_node_num(1));
+    return new_binary(ND_ASSIGN, node, sub);
+  }
   if (consume_kind(TK_SIZEOF)) {
     Node *n = unary();
     Type *t = get_type(n);
@@ -798,6 +808,18 @@ Node *variable(Token *tok) {
       node = new_binary(ND_DEREF, node, NULL);
       node->type = t;
       node = struct_ref(node);
+      continue;
+    }
+
+    if (consume("++")) { // POST_INC
+      Node *add = new_binary(ND_ADD, node, new_node_num(1));
+      node = new_binary(ND_ASSIGN, node, add);
+      continue;
+    }
+
+    if (consume("--")) { // POST_DEC
+      Node *sub = new_binary(ND_SUB, node, new_node_num(1));
+      node = new_binary(ND_ASSIGN, node, sub);
       continue;
     }
     break;
