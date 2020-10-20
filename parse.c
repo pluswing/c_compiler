@@ -814,12 +814,14 @@ Node *variable(Token *tok) {
     if (consume("++")) { // POST_INC
       Node *add = new_binary(ND_ADD, node, new_node_num(1));
       node = new_binary(ND_ASSIGN, node, add);
+      node = new_binary(ND_SUB, node, new_node_num(1));
       continue;
     }
 
     if (consume("--")) { // POST_DEC
       Node *sub = new_binary(ND_SUB, node, new_node_num(1));
       node = new_binary(ND_ASSIGN, node, sub);
+      node = new_binary(ND_ADD, node, new_node_num(1));
       continue;
     }
     break;

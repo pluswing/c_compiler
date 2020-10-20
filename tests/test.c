@@ -473,13 +473,16 @@ int test_addeq_ptr() {
 
 int test_pp() {
   int a = 10;
-  assert(10, a++); // TODO
+  assert(10, a++);
   assert(11, a);
-  ++a;
+
+  assert(12, ++a);
   assert(12, a);
-  assert(12, a--); // TODO
+
+  assert(12, a--);
   assert(11, a);
-  --a;
+
+  assert(10, --a);
   assert(10, a);
 }
 
