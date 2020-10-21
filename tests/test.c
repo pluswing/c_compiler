@@ -486,6 +486,17 @@ int test_pp() {
   assert(10, a);
 }
 
+int test_bit() {
+  // not
+  assert(0, !1);
+  assert(0, !2);
+  assert(1, !0);
+
+  // bit not
+  assert(-1, ~0);
+  assert(0, ~-1);
+}
+
 int main() {
 
   test_calc();
@@ -518,6 +529,7 @@ int main() {
   test_addeq();
   test_addeq_ptr();
   test_pp();
+  test_bit();
 
   printf("OK\n");
   return 0;

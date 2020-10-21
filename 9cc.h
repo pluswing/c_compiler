@@ -157,6 +157,8 @@ typedef enum {
   ND_MEMBER,
   ND_BREAK, // break
   ND_CONTINUE, // continue
+  ND_NOT, // !
+  ND_BITNOT, // ~
   ND_NUM,
 } NodeKind;
 
