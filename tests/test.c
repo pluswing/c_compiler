@@ -495,6 +495,23 @@ int test_bit() {
   // bit not
   assert(-1, ~0);
   assert(0, ~-1);
+
+  // bit and
+  assert(0, 0&1);
+  assert(1, 3&1);
+  assert(3, 7&3);
+  assert(10, -1&10);
+
+  // bit or
+  assert(0, 0|0);
+  assert(1, 0|1);
+  assert(1, 1|1);
+
+  // bit xor
+  assert(0, 0^0);
+  assert(1, 1^0);
+  assert(0, 1^1);
+
 }
 
 int main() {

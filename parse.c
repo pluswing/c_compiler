@@ -372,7 +372,7 @@ Node *expr() {
 
 // assign     = equality ("=" assign)?
 Node *assign() {
-  Node *node = equality();
+  Node *node = bitor();
   if (consume("=")) {
     node = new_binary(ND_ASSIGN, node, assign());
   }
@@ -394,6 +394,32 @@ Node *assign() {
   }
   return node;
 }
+
+Node *bitor() {
+  Node * node = bitxor();
+  while(consume("|")) {
+    node = new_binary(ND_BITOR, node, bitxor());
+  }
+  return node;
+}
+
+Node *bitxor() {
+  Node * node = bitand();
+  while(consume("^")) {
+    node = new_binary(ND_BITXOR, node, bitxor());
+  }
+  return node;
+}
+
+Node *bitand() {
+  Node * node = equality();
+  while(consume("&")) {
+    node = new_binary(ND_BITAND, node, equality());
+  }
+  return node;
+}
+
+
 
 // equality   = relational ("==" relational | "!=" relational)*
 Node *equality() {

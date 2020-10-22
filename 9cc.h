@@ -159,6 +159,9 @@ typedef enum {
   ND_CONTINUE, // continue
   ND_NOT, // !
   ND_BITNOT, // ~
+  ND_BITAND, // &
+  ND_BITOR, // |
+  ND_BITXOR, // ^
   ND_NUM,
 } NodeKind;
 
@@ -218,6 +221,9 @@ Type *define_enum();
 Type *int_type();
 Node *find_enum_var(Token *tok);
 Node *ptr_calc(Node* node, Node *r);
+Node *bitor();
+Node *bitxor();
+Node *bitand();
 
 void gen_val(Node *node);
 void gen(Node *node);
