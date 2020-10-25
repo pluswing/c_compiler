@@ -514,6 +514,17 @@ int test_bit() {
 
 }
 
+int test_and_or() {
+  assert(1, 0||1);
+  assert(1, 0||(2-2)||5);
+  assert(0, 0||0);
+  assert(0, 0||(2-2));
+
+  assert(0, 0&&1);
+  assert(0, (2-2)&&5);
+  assert(1, 1&&5);
+}
+
 int main() {
 
   test_calc();
@@ -547,6 +558,7 @@ int main() {
   test_addeq_ptr();
   test_pp();
   test_bit();
+  test_and_or();
 
   printf("OK\n");
   return 0;

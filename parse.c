@@ -372,7 +372,7 @@ Node *expr() {
 
 // assign     = equality ("=" assign)?
 Node *assign() {
-  Node *node = bitor();
+  Node *node = logor();
   if (consume("=")) {
     node = new_binary(ND_ASSIGN, node, assign());
   }
@@ -395,8 +395,24 @@ Node *assign() {
   return node;
 }
 
+Node *logor() {
+  Node *node = logand();
+  while(consume("||")) {
+    node = new_binary(ND_LOGOR, node, logand());
+  }
+  return node;
+}
+
+Node *logand() {
+  Node *node = bitor();
+  while(consume("&&")) {
+    node = new_binary(ND_LOGAND, node, bitor());
+  }
+  return node;
+}
+
 Node *bitor() {
-  Node * node = bitxor();
+  Node *node = bitxor();
   while(consume("|")) {
     node = new_binary(ND_BITOR, node, bitxor());
   }
@@ -404,7 +420,7 @@ Node *bitor() {
 }
 
 Node *bitxor() {
-  Node * node = bitand();
+  Node *node = bitand();
   while(consume("^")) {
     node = new_binary(ND_BITXOR, node, bitxor());
   }
@@ -412,7 +428,7 @@ Node *bitxor() {
 }
 
 Node *bitand() {
-  Node * node = equality();
+  Node *node = equality();
   while(consume("&")) {
     node = new_binary(ND_BITAND, node, equality());
   }

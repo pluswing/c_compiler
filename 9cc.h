@@ -162,6 +162,8 @@ typedef enum {
   ND_BITAND, // &
   ND_BITOR, // |
   ND_BITXOR, // ^
+  ND_LOGOR, // ||
+  ND_LOGAND, // &&
   ND_NUM,
 } NodeKind;
 
@@ -224,6 +226,8 @@ Node *ptr_calc(Node* node, Node *r);
 Node *bitor();
 Node *bitxor();
 Node *bitand();
+Node *logor();
+Node *logand();
 
 void gen_val(Node *node);
 void gen(Node *node);
