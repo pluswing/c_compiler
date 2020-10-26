@@ -525,6 +525,11 @@ int test_and_or() {
   assert(1, 1&&5);
 }
 
+int test_ternary() {
+  assert(2, 0?1:2);
+  assert(1, 1?1:2);
+}
+
 int main() {
 
   test_calc();
@@ -559,6 +564,7 @@ int main() {
   test_pp();
   test_bit();
   test_and_or();
+  test_ternary();
 
   printf("OK\n");
   return 0;

@@ -312,6 +312,18 @@ void gen(Node *node) {
     printf("  push 1\n");
     printf(".Lend%d:\n", id);
     return;
+  case ND_TERNARY:
+    // A?B:C
+    gen(node->lhs); // A
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  je .Lelse%03d\n", id);
+    gen(node->rhs->lhs); // B
+    printf("  jmp .Lend%03d\n", id);
+    printf(".Lelse%03d:\n", id);
+    gen(node->rhs->rhs); // C
+    printf(".Lend%03d:\n", id);
+    return;
   }
 
   gen(node->lhs);

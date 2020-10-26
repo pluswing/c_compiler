@@ -372,7 +372,7 @@ Node *expr() {
 
 // assign     = equality ("=" assign)?
 Node *assign() {
-  Node *node = logor();
+  Node *node = conditional();
   if (consume("=")) {
     node = new_binary(ND_ASSIGN, node, assign());
   }
@@ -393,6 +393,23 @@ Node *assign() {
     node = new_binary(ND_ASSIGN, node, sub);
   }
   return node;
+}
+
+Node *conditional() {
+  Node *node = logor();
+  if (!consume("?")) {
+    return node;
+  }
+
+  // A?B:C
+  Node *ternary = new_node(ND_TERNARY);
+  ternary->lhs = node; // A
+  Node *r = new_node(ND_TERNARY_R);
+  r->lhs = expr(); // B
+  expect(":");
+  r->rhs = conditional(); // C
+  ternary->rhs = r;
+  return ternary;
 }
 
 Node *logor() {
