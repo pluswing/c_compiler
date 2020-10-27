@@ -24,6 +24,9 @@ typedef enum {
   TK_ENUM, // enum
   TK_BREAK, // break
   TK_CONTINUE, // continue
+  TK_SWITCH, // switch
+  TK_CASE, // case
+  TK_DEFAULT, // default
   TK_EOF, // 入力の終わりを表すトークン
 } TokenKind;
 
@@ -166,6 +169,8 @@ typedef enum {
   ND_LOGAND, // &&
   ND_TERNARY, // ?:
   ND_TERNARY_R, // ?:
+  ND_SWITCH, // switch
+  ND_CASE, // case
   ND_NUM,
 } NodeKind;
 

@@ -530,6 +530,22 @@ int test_ternary() {
   assert(1, 1?1:2);
 }
 
+int test_switch() {
+  int i = 0;
+  switch(0) {
+  case 0:
+    i = 5;
+    break;
+  case 1:
+    i = 6;
+    break;
+  case 2:
+    i = 7;
+    break;
+  }
+  assert(5, i);
+}
+
 int main() {
 
   test_calc();
@@ -565,6 +581,7 @@ int main() {
   test_bit();
   test_and_or();
   test_ternary();
+  test_switch();
 
   printf("OK\n");
   return 0;

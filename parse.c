@@ -7,6 +7,7 @@ StringToken *strings;
 int struct_def_index = 0;
 Tag *tags;
 EnumVar *enum_vars;
+Node *current_switch = 0;
 
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
@@ -349,6 +350,51 @@ Node *stmt() {
     node = calloc(1, sizeof(Node));
     node->kind = ND_CONTINUE;
     expect(";");
+    return node;
+  }
+
+  if (consume_kind(TK_SWITCH)) {
+    Node *node = new_node(ND_SWITCH);
+    expect("(");
+    node->lhs = expr(); // A of switch(A)
+    expect(")");
+
+    Node *sw = current_switch;
+    current_switch = node;
+    // FIXME break_labelを退避させている
+    //  がおそらく必要なし。
+
+    node->rhs = stmt();
+
+    current_switch = sw;
+    return node;
+  }
+
+  if (consume_kind(TK_CASE)) {
+    if (!current_switch) {
+      error("stray case");
+    }
+    int val = expect_number();
+    Node *node = new_node(ND_CASE);
+    expect(":");
+    // node->label = new_unique_name();
+    node->lhs = stmt();
+    node->val = val;
+    // TODO
+    node->case_next = current_switch->case_next;
+    current_switch->case_next = node;
+    return node;
+  }
+
+  if (consume_kind(TK_DEFAULT)) {
+    if (!current_switch) {
+      error("stray default");
+    }
+    Node *node = new_node(ND_CASE);
+    expect(":");
+    // node->label = new_unique_name();
+    node->lhs = stmt();
+    current_switch->default_case = node;
     return node;
   }
 
