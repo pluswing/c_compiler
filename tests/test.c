@@ -533,15 +533,18 @@ int test_ternary() {
 int test_switch() {
   int i = 0;
   switch(0) {
-  case 0:
+  case 0: {
     i = 5;
     break;
-  case 1:
+  }
+  case 1: {
     i = 6;
     break;
-  case 2:
+  }
+  case 2: {
     i = 7;
     break;
+  }
   }
   assert(5, i);
 }

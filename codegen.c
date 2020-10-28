@@ -324,6 +324,39 @@ void gen(Node *node) {
     gen(node->rhs->rhs); // C
     printf(".Lend%03d:\n", id);
     return;
+  case ND_SWITCH:
+    bid = breakId;
+    breakId = id;
+    node->case_label = id;
+
+    gen(node->lhs);
+    printf("  pop rax\n");
+
+    for (Node *n = node->case_next; n; n = n->case_next) {
+      genCounter += 1;
+      n->case_label = genCounter;
+      n->case_end_label = id;
+      printf("  cmp rax, %d\n", n->val);
+      printf("  je .Lcase%03d\n", n->case_label);
+    }
+
+    if (node->default_case) {
+      genCounter += 1;
+      int i = genCounter;
+      node->default_case->case_end_label = id;
+      node->default_case->case_label = i;
+      printf("  jmp .Lcase%03d\n", i);
+    }
+
+    printf("  jmp .Lbreak%03d\n", id);
+    gen(node->rhs);
+    printf(".Lbreak%03d:\n", id);
+    breakId = bid;
+    return;
+  case ND_CASE:
+    printf(".Lcase%03d:\n", node->case_label);
+    gen(node->lhs);
+    return;
   }
 
   gen(node->lhs);

@@ -358,14 +358,9 @@ Node *stmt() {
     expect("(");
     node->lhs = expr(); // A of switch(A)
     expect(")");
-
     Node *sw = current_switch;
     current_switch = node;
-    // FIXME break_labelを退避させている
-    //  がおそらく必要なし。
-
     node->rhs = stmt();
-
     current_switch = sw;
     return node;
   }
@@ -375,12 +370,10 @@ Node *stmt() {
       error("stray case");
     }
     int val = expect_number();
-    Node *node = new_node(ND_CASE);
     expect(":");
-    // node->label = new_unique_name();
+    Node *node = new_node(ND_CASE);
     node->lhs = stmt();
     node->val = val;
-    // TODO
     node->case_next = current_switch->case_next;
     current_switch->case_next = node;
     return node;
@@ -390,9 +383,8 @@ Node *stmt() {
     if (!current_switch) {
       error("stray default");
     }
-    Node *node = new_node(ND_CASE);
     expect(":");
-    // node->label = new_unique_name();
+    Node *node = new_node(ND_CASE);
     node->lhs = stmt();
     current_switch->default_case = node;
     return node;

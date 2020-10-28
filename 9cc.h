@@ -191,6 +191,12 @@ struct Node {
   StringToken *string; // only kind == ND_STRING
   LVar *var;           // only kind == ND_GVAR_DEF
   Member *member; // only kind == ND_MEMBER
+
+  // switch-case
+  Node *case_next;
+  Node *default_case;
+  int case_label;
+  int case_end_label;
 };
 
 extern Node *code[];
