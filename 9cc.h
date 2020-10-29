@@ -196,7 +196,6 @@ struct Node {
   Node *case_next;
   Node *default_case;
   int case_label;
-  int case_end_label;
 };
 
 extern Node *code[];

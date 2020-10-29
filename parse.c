@@ -356,11 +356,11 @@ Node *stmt() {
   if (consume_kind(TK_SWITCH)) {
     Node *node = new_node(ND_SWITCH);
     expect("(");
-    node->lhs = expr(); // A of switch(A)
+    node->lhs = expr(); // A of switch(A) { ..B.. }
     expect(")");
     Node *sw = current_switch;
     current_switch = node;
-    node->rhs = stmt();
+    node->rhs = stmt(); // B
     current_switch = sw;
     return node;
   }
@@ -372,7 +372,6 @@ Node *stmt() {
     int val = expect_number();
     expect(":");
     Node *node = new_node(ND_CASE);
-    node->lhs = stmt();
     node->val = val;
     node->case_next = current_switch->case_next;
     current_switch->case_next = node;
@@ -385,7 +384,6 @@ Node *stmt() {
     }
     expect(":");
     Node *node = new_node(ND_CASE);
-    node->lhs = stmt();
     current_switch->default_case = node;
     return node;
   }
