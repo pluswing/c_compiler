@@ -555,6 +555,11 @@ int test_switch() {
   assert(10, i);
 }
 
+void test_void() {
+  // コンパイルが通ればOK。
+  assert(1, 1);
+}
+
 int main() {
 
   test_calc();
@@ -591,6 +596,7 @@ int main() {
   test_and_or();
   test_ternary();
   test_switch();
+  test_void();
 
   printf("OK\n");
   return 0;

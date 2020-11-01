@@ -207,6 +207,8 @@ Type *define_struct() {
 Define *read_define() {
   Type *type = NULL;
   Token *t = token;
+
+  // typedef
   Token *ident = consume_kind(TK_IDENT);
   if (ident) {
     Tag *tag = find_tag(NULL, ident);
@@ -216,12 +218,18 @@ Define *read_define() {
       token = t;
     }
   }
+
+  // struct
   if (!type) {
     type = define_struct();
   }
+
+  // enum
   if (!type) {
     type = define_enum();
   }
+
+  // int or ...
   if (!type) {
     Token *typeToken = consume_kind(TK_TYPE);
     if (!typeToken) {
@@ -229,6 +237,7 @@ Define *read_define() {
     }
 
     type = calloc(1, sizeof(Type));
+    // 暫定: voidはintのalias。
     int isChar = memcmp("char", typeToken->str, typeToken->len) == 0;
     type->ty = isChar ? CHAR : INT;
     type->ptr_to = NULL;
