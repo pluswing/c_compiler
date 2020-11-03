@@ -7,14 +7,14 @@ char *filename;
 char *read_file(char *path) {
   FILE *fp = fopen(path, "r");
   if (!fp) {
-    error("cannot open %s: %s", path, strerror(errno));
+    error2("cannot open %s: %s", path, strerror(errno));
   }
   if (fseek(fp, 0, SEEK_END) == -1) {
-    error("%s: fseek %s", path, strerror(errno));
+    error2("%s: fseek %s", path, strerror(errno));
   }
   size_t size = ftell(fp);
   if (fseek(fp, 0, SEEK_SET) == -1) {
-    error("%s: fseek %s", path, strerror(errno));
+    error2("%s: fseek %s", path, strerror(errno));
   }
 
   char *buf = calloc(1, size + 2);
@@ -28,18 +28,29 @@ char *read_file(char *path) {
   return buf;
 }
 
-void error(char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
+void error(char *fmt) {
+  fprintf(stderr, fmt);
   fprintf(stderr, "\n");
   exit(1);
 }
 
-void error_at(char *loc, char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
+void error1(char *fmt, char *v1) {
+  fprintf(stderr, fmt, v1);
+  fprintf(stderr, "\n");
+  exit(1);
+}
 
+void error2(char *fmt, char *v1, char *v2) {
+  fprintf(stderr, fmt, v1, v2);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
+void error_at(char *loc, char *fmt) {
+  error_at_s(loc, fmt, NULL);
+}
+
+void error_at_s(char *loc, char *fmt, char *val) {
   char *line = loc;
   while(user_input < line && line[-1] != '\n') {
     line--;
@@ -62,7 +73,7 @@ void error_at(char *loc, char *fmt, ...) {
   int pos = loc - line + indent;
   fprintf(stderr, "%*s", pos, "");
   fprintf(stderr, "^ ");
-  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, fmt, val);
   fprintf(stderr, "\n");
   exit(1);
 }
@@ -98,7 +109,7 @@ void expect(char *op) {
       strlen(op) != token->len ||
       memcmp(token->str, op, token->len)) {
 
-    error_at(token->str, "\"%s\"ではありません", op);
+    error_at_s(token->str, "\"%s\"ではありません", op);
   }
   token = token->next;
 }

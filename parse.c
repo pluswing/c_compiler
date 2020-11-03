@@ -853,7 +853,7 @@ Node *define_variable(Define *def, LVar **varlist) {
 
   LVar *lvar = find_variable(def->ident);
   if (lvar != NULL) {
-    error("redefined variable: %s", node->varname);
+    error1("redefined variable: %s", node->varname);
   }
   // TODO あとでなおす
   node->kind = locals == varlist ? ND_LVAR : ND_GVAR;
@@ -884,7 +884,7 @@ Node *variable(Token *tok) {
 
   LVar *lvar = find_variable(tok);
   if (lvar == NULL) {
-    error("undefined variable: %s", node->varname);
+    error1("undefined variable: %s", node->varname);
   }
   node->kind = lvar->kind == LOCAL ? ND_LVAR : ND_GVAR;
   node->offset = lvar->offset;

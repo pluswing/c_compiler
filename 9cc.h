@@ -118,8 +118,11 @@ extern Tag *tags;
 extern EnumVar *enum_vars;
 
 char *read_file(char *path);
-void error(char *fmt, ...);
-void error_at(char *loc, char *fmt, ...);
+void error(char *fmt);
+void error1(char *fmt, char *v1);
+void error2(char *fmt, char *v1, char *v2);
+void error_at(char *loc, char *fmt);
+void error_at_s(char *loc, char *fmt, char *val);
 bool consume(char *op);
 bool peek(char *op);
 Token *consume_kind(TokenKind kind);
