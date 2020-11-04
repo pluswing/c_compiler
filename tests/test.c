@@ -255,6 +255,8 @@ int test_sizeof() {
   assert(4, sizeof(*y));
 
   assert(4, sizeof(1));
+
+  // assert(4, sizeof(int));
 }
 
 int test_array() {

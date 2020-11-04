@@ -179,7 +179,7 @@ Type *define_struct() {
   int maxSize = 0;
   while(!consume("}")) {
     Define *def = read_define();
-    read_type(def);
+    read_type_suffix(def);
     expect(";");
     Member *m = calloc(1, sizeof(Member));
     m->name = calloc(100, sizeof(char));
@@ -205,6 +205,23 @@ Type *define_struct() {
 
 // 関数か変数の定義の前半部分を読んで、LVarに詰める
 Define *read_define() {
+  Type *type = read_type();
+  if (type == NULL) {
+    return NULL;
+  }
+
+  Token *tok = consume_kind(TK_IDENT);
+  if (tok == NULL) {
+    error("invalid define function or variable");
+  }
+
+  Define *def = calloc(1, sizeof(Define));
+  def->type = type;
+  def->ident = tok;
+  return def;
+}
+
+Type *read_type() {
   Type *type = NULL;
   Token *t = token;
 
@@ -250,16 +267,7 @@ Define *read_define() {
     t->ptr_to = type;
     type = t;
   }
-
-  Token *tok = consume_kind(TK_IDENT);
-  if (tok == NULL) {
-    error("invalid define function or variable");
-  }
-
-  Define *def = calloc(1, sizeof(Define));
-  def->type = type;
-  def->ident = tok;
-  return def;
+  return type;
 }
 
 // stmt    = expr ";"
@@ -605,8 +613,7 @@ Node *unary() {
   if (consume_kind(TK_SIZEOF)) {
     Node *n = unary();
     Type *t = get_type(n);
-    int size = t && t->ty == PTR ? 8
-             : t && t->ty == CHAR ? 1 : 4;
+    int size = get_size(t);
     return new_node_num(size);
   }
   return primary();
@@ -765,7 +772,7 @@ Node *local_variable_init(Node *node) {
   return assign;
 }
 
-void read_type(Define *def) {
+void read_type_suffix(Define *def) {
   if (def == NULL) {
     error("invalid define");
   }
@@ -788,6 +795,10 @@ void read_type(Define *def) {
 }
 
 int get_size(Type *type) {
+
+  // FIXME 数値の場合は4を返せばいい。
+  if (type == NULL) return 4;
+
   if (type->ty == STRUCT) {
     return type->size;
   }
@@ -802,7 +813,7 @@ int get_size(Type *type) {
 }
 
 Node *define_variable(Define *def, LVar **varlist) {
-  read_type(def);
+  read_type_suffix(def);
   Type *type = def->type;
   Node *node = calloc(1, sizeof(Node));
   node->varname = calloc(100, sizeof(char));
