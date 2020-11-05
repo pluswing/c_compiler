@@ -611,8 +611,17 @@ Node *unary() {
     return new_binary(ND_ASSIGN, node, sub);
   }
   if (consume_kind(TK_SIZEOF)) {
-    Node *n = unary();
-    Type *t = get_type(n);
+    Token *tok = token;
+    // sizeof int  <- 現状この形式はサポートしない。
+    consume("(");
+    Type *t = read_type();
+    if (t) {
+      expect(")");
+    } else {
+      token = tok;
+      Node *n = unary();
+      t = get_type(n);
+    }
     int size = get_size(t);
     return new_node_num(size);
   }

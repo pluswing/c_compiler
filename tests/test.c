@@ -256,7 +256,22 @@ int test_sizeof() {
 
   assert(4, sizeof(1));
 
-  // assert(4, sizeof(int));
+  assert(4, sizeof(int));
+  assert(1, sizeof(char));
+
+  struct SizeOfTest {
+    int a;
+    char b;
+  } a;
+
+  // struct
+  // TODO 要確認
+  assert(8, sizeof(a));
+  assert(8, sizeof(struct SizeOfTest));
+
+  // typedef
+  assert(4, sizeof(Int));
+  assert(8, sizeof(String));
 }
 
 int test_array() {
@@ -364,9 +379,6 @@ int test_struct() {
   ccc2.a = 7;
   struct StTest *ptr = &ccc2;
   assert(7, ptr->a);
-
-  // TODO sizeof(struct型)が未対応
-  // TODO sizeof(型)が未対応
 }
 
 int test_typedef() {
