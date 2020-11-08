@@ -29,7 +29,7 @@ char *read_file(char *path) {
 }
 
 void error(char *fmt) {
-  fprintf(stderr, fmt);
+  fprintf(stderr, fmt, "");
   fprintf(stderr, "\n");
   exit(1);
 }

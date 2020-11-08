@@ -574,6 +574,13 @@ void test_void() {
   assert(1, 1);
 }
 
+void test_nest_types() {
+  struct Nest {
+    struct Nest *next;
+    int a;
+  } b;
+}
+
 int main() {
 
   test_calc();

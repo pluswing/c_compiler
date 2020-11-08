@@ -65,6 +65,7 @@ struct Type {
   size_t array_size;
   Member *members;
   int size;
+  bool incomplete;
 };
 
 typedef struct LVar LVar;

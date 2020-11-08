@@ -229,7 +229,7 @@ Type *read_type() {
   Token *ident = consume_kind(TK_IDENT);
   if (ident) {
     Tag *tag = find_tag(NULL, ident);
-    if (tag) {
+    if (!tag->type->incomplete) {
       type = tag->type;
     } else {
       token = t;
@@ -1015,17 +1015,21 @@ void push_tag(char *prefix, Token *token, Type *type) {
   } else {
     memcpy(name, token->str, token->len);
   }
-  Tag *tag = calloc(1, sizeof(Tag));
-  tag->name = name;
-  tag->type = type;
-  if (tags) {
-    tag->next = tags;
-  }
-  tags = tag;
+  Tag *tag = find_tag(prefix, token);
+  // tag->typeを直接上書きすると、
+  // すでにtag->typeを参照しているところが
+  // imncompleteなtypeを参照し続けるので、
+  // 直接上書きはしない。
+  tag->type->array_size = type->array_size;
+  tag->type->incomplete = false;
+  tag->type->members = type->members;
+  tag->type->ptr_to = type->ptr_to;
+  tag->type->size = type->size;
+  tag->type->ty = type->ty;
 }
 
 Tag *find_tag(char *prefix, Token *token) {
-  char name[100] = {0};
+  char *name = calloc(100, sizeof(char));
   if (prefix) {
     memcpy(name, prefix, strlen(prefix));
     memcpy(name + strlen(prefix), " ", 1);
@@ -1038,7 +1042,17 @@ Tag *find_tag(char *prefix, Token *token) {
       return tag;
     }
   }
-  return NULL;
+
+  // 不完全な状態で仮の型を作っておく。
+  Tag *tag = calloc(1, sizeof(Tag));
+  tag->name = name;
+  tag->type = calloc(1, sizeof(Type));
+  tag->type->incomplete = true;
+  if (tags) {
+    tag->next = tags;
+  }
+  tags = tag;
+  return tag;
 }
 
 Node *find_enum_var(Token *tok) {
