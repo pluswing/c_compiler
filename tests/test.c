@@ -19,6 +19,12 @@ typedef char* String;
 String strtest = "cccc";
 typedef struct Hoge StructHoge;
 
+typedef struct Nest Nest;
+struct Nest {
+  struct Nest *next;
+  int a;
+};
+
 enum HogeEnum {
   AAA = 10,
   BBB,
@@ -575,10 +581,21 @@ void test_void() {
 }
 
 void test_nest_types() {
-  struct Nest {
-    struct Nest *next;
-    int a;
-  } b;
+  Nest a;
+  Nest *b;
+  a.a = 10;
+  b = &a;
+  assert(10, b->a);
+
+  Nest c;
+  c.a = 20;
+  a.next = &c;
+  assert(20, b->next->a);
+
+  Nest d;
+  d.a = 30;
+  c.next = &d;
+  assert(30, b->next->next->a);
 }
 
 int main() {
@@ -618,6 +635,7 @@ int main() {
   test_ternary();
   test_switch();
   test_void();
+  test_nest_types();
 
   printf("OK\n");
   return 0;

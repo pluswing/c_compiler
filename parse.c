@@ -137,7 +137,7 @@ Type *define_enum() {
   }
 
   if (name) {
-    push_tag("enum", name, int_type());
+    push_tag("enum", name, int_type(), false);
   }
   return int_type();
 }
@@ -156,7 +156,7 @@ bool define_typedef() {
   }
   Define *def = read_define();
   expect(";");
-  push_tag(NULL, def->ident, def->type);
+  push_tag(NULL, def->ident, def->type, true);
   return true;
 }
 
@@ -198,7 +198,7 @@ Type *define_struct() {
   t->size = align_to(offset, maxSize);
 
   if (name) {
-    push_tag("struct", name, t);
+    push_tag("struct", name, t, false);
   }
   return t;
 }
@@ -975,7 +975,7 @@ Member *find_member(Token *token, Type* type) {
   if (!type) {
     error("member type not found");
   }
-  char name[100];
+  char name[100] = {0};
   memcpy(name, token->str, token->len);
   for (Member *m = type->members; m; m = m->next) {
     if (strcmp(name, m->name) == 0) {
@@ -1006,7 +1006,7 @@ int align_to(int n, int align) {
   return (n + align - 1) & ~(align - 1);
 }
 
-void push_tag(char *prefix, Token *token, Type *type) {
+void push_tag(char *prefix, Token *token, Type *type, bool is_typedef) {
   char *name = calloc(100, sizeof(char));
   if (prefix) {
     memcpy(name, prefix, strlen(prefix));
@@ -1020,12 +1020,16 @@ void push_tag(char *prefix, Token *token, Type *type) {
   // すでにtag->typeを参照しているところが
   // imncompleteなtypeを参照し続けるので、
   // 直接上書きはしない。
-  tag->type->array_size = type->array_size;
-  tag->type->incomplete = false;
-  tag->type->members = type->members;
-  tag->type->ptr_to = type->ptr_to;
-  tag->type->size = type->size;
-  tag->type->ty = type->ty;
+  if (is_typedef) {
+    tag->type = type;
+  } else {
+    tag->type->array_size = type->array_size;
+    tag->type->incomplete = false;
+    tag->type->members = type->members;
+    tag->type->ptr_to = type->ptr_to;
+    tag->type->size = type->size;
+    tag->type->ty = type->ty;
+  }
 }
 
 Tag *find_tag(char *prefix, Token *token) {

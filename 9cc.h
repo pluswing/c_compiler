@@ -232,7 +232,7 @@ void read_type_suffix(Define *def);
 int get_size(Type *type);
 Member *find_member(Token *token, Type* type);
 int align_to(int n, int align);
-void push_tag(char *prefix, Token *token, Type *type);
+void push_tag(char *prefix, Token *token, Type *type, bool is_typedef);
 Tag *find_tag(char *prefix, Token *token);
 Node *struct_ref(Node *node);
 bool define_typedef();
