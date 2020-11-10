@@ -205,6 +205,14 @@ Token *tokenize() {
       continue;
     }
 
+    // #includeは読み飛ばす
+    if (startswith(p, "#include")) {
+      while(*p != '\n') {
+        p++;
+      }
+      continue;
+    }
+
     if (startswith(p, "==") ||
         startswith(p, "!=") ||
         startswith(p, "<=") ||

@@ -116,6 +116,10 @@ Type *define_enum() {
   expect("{");
   int num = 0;
   while(true) {
+    // 最後の要素に,が付いててもOK
+    if (consume("}")) {
+      break;
+    }
     Token *n = consume_kind(TK_IDENT);
     if (consume("=")) {
       num = expect_number();
