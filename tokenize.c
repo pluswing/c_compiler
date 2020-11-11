@@ -161,7 +161,9 @@ ReservedWord reservedWords[] = {
   {"for", TK_FOR},
   {"int", TK_TYPE},
   {"char", TK_TYPE},
-  {"void", TK_TYPE},
+  {"void", TK_TYPE}, // int alias
+  {"size_t", TK_TYPE}, // int alias
+  {"bool", TK_TYPE}, // int alias
   {"sizeof", TK_SIZEOF},
   {"struct", TK_STRUCT},
   {"typedef", TK_TYPEDEF},
@@ -207,6 +209,13 @@ Token *tokenize() {
 
     // #includeは読み飛ばす
     if (startswith(p, "#include")) {
+      while(*p != '\n') {
+        p++;
+      }
+      continue;
+    }
+    // externも読み飛ばす。
+    if (startswith(p, "extern")) {
       while(*p != '\n') {
         p++;
       }

@@ -34,12 +34,12 @@ typedef struct Token Token;
 
 struct Token {
   TokenKind kind;
-//  Token *next;
+  Token *next;
   int val;
   char *str;
   int len;
 };
-/*
+
 
 typedef struct Member Member;
 typedef struct Type Type;
@@ -111,7 +111,6 @@ struct EnumVar {
 extern Token *token;
 extern char *user_input;
 extern char *filename;
-
 extern LVar *locals[];
 extern LVar *globals[];
 extern int cur_func;
@@ -119,6 +118,7 @@ extern Tag *tags;
 extern EnumVar *enum_vars;
 
 char *read_file(char *path);
+
 void error(char *fmt);
 void error1(char *fmt, char *v1);
 void error2(char *fmt, char *v1, char *v2);
@@ -249,4 +249,3 @@ Node *conditional();
 
 void gen_val(Node *node);
 void gen(Node *node);
-*/

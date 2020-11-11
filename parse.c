@@ -89,6 +89,9 @@ Node *func() {
       }
       expect(",");
     }
+    if (consume(";")) {
+      return NULL;
+    }
     node->lhs = stmt();
     return node;
   } else {
@@ -1026,6 +1029,8 @@ void push_tag(char *prefix, Token *token, Type *type, bool is_typedef) {
   // 直接上書きはしない。
   if (is_typedef) {
     tag->type = type;
+    // TODO ここでincompleteを落とす必要ないんじゃないか説
+    tag->type->incomplete = false;
   } else {
     tag->type->array_size = type->array_size;
     tag->type->incomplete = false;

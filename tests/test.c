@@ -31,6 +31,11 @@ enum HogeEnum {
   CCC
 };
 
+enum LastComma {
+  AAA,
+  BBB, // 最後にカンマはあっても良い。
+};
+
 int assert(int expected, int actual) {
 
   if (expected == actual) {
