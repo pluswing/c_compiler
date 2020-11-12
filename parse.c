@@ -89,7 +89,9 @@ Node *func() {
       }
       expect(",");
     }
+    // プロトタイプ宣言なので無視する。
     if (consume(";")) {
+      // FIXME localsを消す必要あり？
       return NULL;
     }
     node->lhs = stmt();

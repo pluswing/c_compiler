@@ -1,14 +1,23 @@
 #include "9cc.h"
 
 int main(int argc, char **argv) {
-  if (argc != 2) {
-    fprintf(stderr, "invalid args\n");
-    return 1;
+  for (int i = 1; i < argc; i++) {
+    filename = argv[i];
+    user_input = read_file(filename);
+    Token *t = tokenize();
+    if (!token) {
+      token = t;
+    } else {
+      Token *tt = token;
+      while (true) {
+        if (!tt->next) {
+          tt->next = t;
+          break;
+        }
+      }
+    }
   }
 
-  filename = argv[1];
-  user_input = read_file(filename);
-  token = tokenize();
   program();
 
   printf(".intel_syntax noprefix\n");

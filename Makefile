@@ -11,7 +11,7 @@ test: 9cc
 	./test.sh
 
 self: 9cc
-	./9cc 9cc2.h
+	./9cc 9cc2.h tokenize.c
 
 clean:
 	rm -f 9cc *.o *~ tmp*

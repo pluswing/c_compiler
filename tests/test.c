@@ -36,6 +36,15 @@ enum LastComma {
   BBB, // 最後にカンマはあっても良い。
 };
 
+// size_t, boolはintのalias
+size_t size_t_v = 10;
+bool bool_v = 1;
+
+// extern, プロトタイプ宣言は無視される。
+extern int hoge;
+// FIXME プロトタイプ宣言をするとおかしくなるよ
+// int assert_X(int expected_X, int actual_X);
+
 int assert(int expected, int actual) {
 
   if (expected == actual) {
