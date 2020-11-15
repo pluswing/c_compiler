@@ -91,7 +91,8 @@ Node *func() {
     }
     // プロトタイプ宣言なので無視する。
     if (consume(";")) {
-      // FIXME localsを消す必要あり？
+      locals[cur_func] = NULL;
+      cur_func--;
       return NULL;
     }
     node->lhs = stmt();

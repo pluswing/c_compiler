@@ -109,7 +109,7 @@ void expect(char *op) {
       strlen(op) != token->len ||
       memcmp(token->str, op, token->len)) {
 
-    error_at_s(token->str, "\"%s\"ではありません", op);
+    error_at_s(token->str, "'%s'ではありません", op);
   }
   token = token->next;
 }
@@ -240,6 +240,14 @@ Token *tokenize() {
       p += 2;
       continue;
     }
+
+    // char literal
+    if (*p == '\'') {
+      cur = read_char_literal(cur, p);
+      p += cur->len;
+      continue;
+    }
+
     if (strchr("+-*/()<>=;{},&[].!~|^?:", *p)) {
       cur = new_token(TK_RESRVED, cur, p++, 1);
       continue;
@@ -300,3 +308,42 @@ Token *tokenize() {
   return head.next;
 }
 
+Token *read_char_literal(Token *cur, char *start) {
+  char *p = start + 1;
+  if (*p == '\0') {
+    error_at(start, "unclosed char literal");
+  }
+
+  char c;
+  if (*p == '\\') {
+    p++;
+    c = get_escape_char(*p++);
+  } else {
+    c = *p;
+    p++;
+  }
+
+  if (*p != '\'') {
+    error_at(start, "char literal too long");
+  }
+  p++;
+
+  Token *tok = new_token(TK_NUM, cur, start, p - start);
+  tok->val = c;
+  return tok;
+}
+
+char get_escape_char(char c) {
+  switch (c) {
+  case 'a': return '\a';
+  case 'b': return '\b';
+  case 't': return '\t';
+  case 'n': return '\n';
+  case 'v': return '\v';
+  case 'f': return '\f';
+  case 'r': return '\r';
+  case 'e': return 27;
+  case '0': return 0;
+  default: return c;
+  }
+}

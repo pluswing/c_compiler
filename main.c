@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
           tt->next = t;
           break;
         }
+        tt = tt->next;
       }
     }
   }

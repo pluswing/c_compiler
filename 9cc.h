@@ -133,6 +133,8 @@ bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 bool startswith(char *p, char *q);
 Token *tokenize();
+Token *read_char_literal(Token *cur, char *start);
+char get_escape_char(char c);
 
 // codegen
 typedef enum {
