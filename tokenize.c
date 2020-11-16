@@ -291,7 +291,14 @@ Token *tokenize() {
     if ('"' == *p) {
       p++;
       char *c = p;
-      while('"' != *c) {
+      while (true) {
+        if (startswith(c, "\\\"")) {
+          c += 2;
+          continue;
+        }
+        if (*c == '"') {
+          break;
+        }
         c++;
       }
       int len = c - p;

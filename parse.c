@@ -42,10 +42,12 @@ Node *code[100];
 void program() {
   int i = 0;
   while(!at_eof()) {
+    fprintf(stderr, "program\n");
     Node *n = func();
     if (!n) {
       continue;
     }
+    fprintf(stderr, "code: %d\n", i);
     code[i++] = n;
   }
   code[i] = NULL;
@@ -73,6 +75,7 @@ Node *func() {
   }
 
   Define *def = read_define();
+  fprintf(stderr, "def\n");
 
   if (consume("(")) {
     cur_func++;
@@ -93,12 +96,15 @@ Node *func() {
     if (consume(";")) {
       locals[cur_func] = NULL;
       cur_func--;
+      fprintf(stderr, "prptotype\n");
       return NULL;
     }
+    fprintf(stderr, "func\n");
     node->lhs = stmt();
     return node;
   } else {
     // 変数定義
+    fprintf(stderr, "variable\n");
     node = define_variable(def, globals);
     node->kind = ND_GVAR_DEF;
     expect(";");
