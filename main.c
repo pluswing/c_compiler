@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     } else {
       Token *tt = token;
       while (true) {
-        if (!tt->next) {
+        if (tt->next->kind == TK_EOF) {
           tt->next = t;
           break;
         }

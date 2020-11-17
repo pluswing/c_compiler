@@ -37,17 +37,30 @@ Node *new_node_string(StringToken *s) {
 // TODO 100
 Node *code[100];
 
+void define_constant(char *name, int value) {
+  EnumVar *e = calloc(1, sizeof(EnumVar));
+  e->name = name;
+  e->value = value;
+  e->next = enum_vars;
+  enum_vars = e;
+}
+
 
 // program    = func*
 void program() {
+  define_constant("errno", 0);
+  define_constant("SEEK_END", 2);
+  define_constant("SEEK_SET", 0);
+  define_constant("stderr", 0);
+  define_constant("NULL", 0);
+  define_constant("false", 0);
+  define_constant("true", 1);
   int i = 0;
   while(!at_eof()) {
-    fprintf(stderr, "program\n");
     Node *n = func();
     if (!n) {
       continue;
     }
-    fprintf(stderr, "code: %d\n", i);
     code[i++] = n;
   }
   code[i] = NULL;
@@ -75,7 +88,6 @@ Node *func() {
   }
 
   Define *def = read_define();
-  fprintf(stderr, "def\n");
 
   if (consume("(")) {
     cur_func++;
@@ -96,15 +108,12 @@ Node *func() {
     if (consume(";")) {
       locals[cur_func] = NULL;
       cur_func--;
-      fprintf(stderr, "prptotype\n");
       return NULL;
     }
-    fprintf(stderr, "func\n");
     node->lhs = stmt();
     return node;
   } else {
     // 変数定義
-    fprintf(stderr, "variable\n");
     node = define_variable(def, globals);
     node->kind = ND_GVAR_DEF;
     expect(";");
