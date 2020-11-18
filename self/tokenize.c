@@ -154,7 +154,8 @@ struct ReservedWord {
   TokenKind kind;
 };
 
-ReservedWord reservedWords[] = {
+ReservedWord reservedWords[1];
+/* = {
   {"return", TK_RETURN},
   {"if", TK_IF},
   {"else", TK_ELSE},
@@ -177,6 +178,7 @@ ReservedWord reservedWords[] = {
   {"default", TK_DEFAULT},
   {"", TK_EOF},
 };
+*/
 
 Token *tokenize() {
   char *p = user_input;
@@ -256,7 +258,8 @@ Token *tokenize() {
     }
 
     bool found = false;
-    for (int i = 0; reservedWords[i].kind != TK_EOF; i++) {
+    int i;
+    for (i = 0; reservedWords[i].kind != TK_EOF; i++) {
       char *w = reservedWords[i].word;
       int len = strlen(w);
       TokenKind kind = reservedWords[i].kind;

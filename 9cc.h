@@ -207,6 +207,8 @@ struct Node {
 extern Node *code[];
 extern StringToken *strings;
 
+char *token2string(Token *token);
+
 Node *new_node(NodeKind kind);
 Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);

@@ -9,6 +9,12 @@ Tag *tags;
 EnumVar *enum_vars;
 Node *current_switch = 0;
 
+char *token2string(Token *token) {
+  char *str = calloc(token->len + 1, sizeof(char));
+  memcpy(str, token->str, token->len);
+  return str;
+}
+
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
@@ -900,23 +906,23 @@ Node *define_variable(Define *def, LVar **varlist) {
   if (lvar != NULL) {
     error1("redefined variable: %s", node->varname);
   }
-  // TODO あとでなおす
   node->kind = locals == varlist ? ND_LVAR : ND_GVAR;
+  int current = locals == varlist ? cur_func : 0;
   lvar = calloc(1, sizeof(LVar));
-  lvar->next = varlist[cur_func];
+  lvar->next = varlist[current];
   lvar->name = def->ident->str;
   lvar->len = def->ident->len;
   lvar->init = init;
-  if (varlist[cur_func] == NULL) {
+  if (varlist[current] == NULL) {
     lvar->offset = node->size;
   } else {
-    lvar->offset = varlist[cur_func]->offset + node->size;
+    lvar->offset = varlist[current]->offset + node->size;
   }
   lvar->type = type;
   node->offset = lvar->offset;
   node->type = lvar->type;
   node->var = lvar;
-  varlist[cur_func] = lvar;
+  varlist[current] = lvar;
   return node;
 }
 
@@ -998,7 +1004,7 @@ Member *find_member(Token *token, Type* type) {
     error("member ident not found");
   }
   if (!type) {
-    error("member type not found");
+    error1("member type not found: %s", token2string(token));
   }
   char name[100] = {0};
   memcpy(name, token->str, token->len);
