@@ -9,12 +9,6 @@ Tag *tags;
 EnumVar *enum_vars;
 Node *current_switch = 0;
 
-char *token2string(Token *token) {
-  char *str = calloc(token->len + 1, sizeof(char));
-  memcpy(str, token->str, token->len);
-  return str;
-}
-
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
@@ -332,8 +326,9 @@ Node *stmt() {
     right->kind = ND_FOR_RIGHT;
 
     if (!consume(";")) {
-      left->lhs = expr();
-      expect(";");
+      // 変数定義を許すためにstmt()に変更。
+      left->lhs = stmt(); // expr();
+      // expect(";");
     }
 
     if (!consume(";")) {
@@ -904,7 +899,11 @@ Node *define_variable(Define *def, LVar **varlist) {
 
   LVar *lvar = find_variable(def->ident);
   if (lvar != NULL) {
-    error1("redefined variable: %s", node->varname);
+    // ブロックスコープを実装していないので、
+    // セルフコンパイル時に邪魔。
+    //  -> 変数の重複定義を許す。
+    //    -> FIXME 副作用があるかも。
+    // error1("redefined variable: %s", node->varname);
   }
   node->kind = locals == varlist ? ND_LVAR : ND_GVAR;
   int current = locals == varlist ? cur_func : 0;
@@ -941,6 +940,9 @@ Node *variable(Token *tok) {
   node->offset = lvar->offset;
   node->type = lvar->type;
 
+  Type *type = node->type;
+  char *varname = node->varname;
+
   while(true) {
     if (consume("[")) {
       Node *add = calloc(1, sizeof(Node));
@@ -954,6 +956,8 @@ Node *variable(Token *tok) {
       node = calloc(1, sizeof(Node));
       node->kind = ND_DEREF;
       node->lhs = add;
+      node->varname = varname;
+      node->type = type->ptr_to;
       expect("]");
       continue;
     }
@@ -995,6 +999,7 @@ Node *struct_ref(Node *node) {
   member->kind = ND_MEMBER;
   member->lhs = node;
   member->member = find_member(consume_kind(TK_IDENT), node->type);
+  // TODO varname設定するべき
   member->type = member->member->ty;
   return member;
 }
@@ -1008,6 +1013,7 @@ Member *find_member(Token *token, Type* type) {
   }
   char name[100] = {0};
   memcpy(name, token->str, token->len);
+  fprintf(stderr, "find member: %s\n", name);
   for (Member *m = type->members; m; m = m->next) {
     if (strcmp(name, m->name) == 0) {
       return m;

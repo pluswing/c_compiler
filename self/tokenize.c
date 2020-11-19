@@ -62,8 +62,7 @@ void error_at_s(char *loc, char *fmt, char *val) {
   }
 
   int line_num = 1;
-  char *p;
-  for (p = user_input; p < line; p++) {
+  for (char *p = user_input; p < line; p++) {
     if (*p == '\n') {
       line_num++;
     }
@@ -258,8 +257,7 @@ Token *tokenize() {
     }
 
     bool found = false;
-    int i;
-    for (i = 0; reservedWords[i].kind != TK_EOF; i++) {
+    for (int i = 0; reservedWords[i].kind != TK_EOF; i++) {
       char *w = reservedWords[i].word;
       int len = strlen(w);
       TokenKind kind = reservedWords[i].kind;

@@ -4,6 +4,12 @@ Token *token;
 char *user_input;
 char *filename;
 
+char *token2string(Token *token) {
+  char *str = calloc(token->len + 1, sizeof(char));
+  memcpy(str, token->str, token->len);
+  return str;
+}
+
 char *read_file(char *path) {
   FILE *fp = fopen(path, "r");
   if (!fp) {
@@ -85,6 +91,7 @@ bool consume(char *op) {
 
     return false;
   }
+  fprintf(stderr, "%s ", token2string(token));
   token = token->next;
   return true;
 }
@@ -100,6 +107,7 @@ Token* consume_kind(TokenKind kind) {
     return NULL;
   }
   Token* tok = token;
+  fprintf(stderr, "%s ", token2string(token));
   token = token->next;
   return tok;
 }
@@ -111,6 +119,7 @@ void expect(char *op) {
 
     error_at_s(token->str, "'%s'ではありません", op);
   }
+  fprintf(stderr, "%s ", token2string(token));
   token = token->next;
 }
 
@@ -119,6 +128,7 @@ int expect_number() {
     error_at(token->str, "数字ではありません");
   }
   int val = token->val;
+  fprintf(stderr, "%s ", token2string(token));
   token = token->next;
   return val;
 }
