@@ -23,10 +23,10 @@ void gen_val(Node *node) {
 }
 
 int genCounter = 0;
-static char *argreg1[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
-static char *argreg2[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
-static char *argreg4[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
-static char *argreg8[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+char *argreg1[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
+char *argreg2[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
+char *argreg4[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
+char *argreg8[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 int breakId = 0;
 int continueId = 0;

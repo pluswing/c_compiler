@@ -616,6 +616,29 @@ void test_char_literal() {
   assert(10, '\n');
 }
 
+void test_hack() {
+  // 変数の重複定義OK
+  {
+    int a = 10;
+    assert(10, a);
+  }
+  {
+    int a = 20;
+    assert(20, a);
+  }
+
+  // forの最初に変数定義
+  for (int b = 0; b < 10; b++) {
+  }
+  assert(10, b);
+
+  // 配列アクセス ＋ "." access
+  struct {int a;} c[10];
+  c[0].a = 10;
+  assert(10, c[0].a);
+  // もうちょっとテストケース追加する。
+}
+
 int main() {
 
   test_calc();
@@ -655,6 +678,8 @@ int main() {
   test_void();
   test_nest_types();
   test_char_literal();
+
+  test_hack();
 
   printf("OK\n");
   return 0;

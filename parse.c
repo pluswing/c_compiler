@@ -377,6 +377,13 @@ Node *stmt() {
   if (consume_kind(TK_RETURN)) {
     node = calloc(1, sizeof(Node));
     node->kind = ND_RETURN;
+    // hack! void対応。
+    // 戻り値がない場合は、0を補完する。
+    // return; -> return 0;
+    if (consume(";")) {
+      node->lhs = new_node_num(0);
+      return node;
+    }
     node->lhs = expr();
     expect(";");
     return node;
@@ -412,7 +419,20 @@ Node *stmt() {
     if (!current_switch) {
       error("stray case");
     }
-    int val = expect_number();
+    // ND_STRINGとかenum値やtrue, falseの場合の対処。
+    Token *t = token;
+    Token *ident = consume_kind(TK_IDENT);
+    int val;
+    Node *n = NULL;
+    if (ident) {
+      n = find_enum_var(ident);
+    }
+    if (n) {
+      val = n->val;
+    } else {
+      token = t;
+      val = expect_number();
+    }
     expect(":");
     Node *node = new_node(ND_CASE);
     node->val = val;
@@ -939,8 +959,6 @@ Node *variable(Token *tok) {
   node->kind = lvar->kind == LOCAL ? ND_LVAR : ND_GVAR;
   node->offset = lvar->offset;
   node->type = lvar->type;
-
-  Type *type = node->type;
   char *varname = node->varname;
 
   while(true) {
@@ -953,6 +971,7 @@ Node *variable(Token *tok) {
               : node->type->ptr_to->ty == CHAR ? 1 : 8;
         add->rhs = new_binary(ND_MUL, expr(), new_node_num(n));
       }
+      Type *type = node->type;
       node = calloc(1, sizeof(Node));
       node->kind = ND_DEREF;
       node->lhs = add;
