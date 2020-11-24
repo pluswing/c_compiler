@@ -61,6 +61,9 @@ void program() {
     if (!n) {
       continue;
     }
+    if (i > 100) {
+      error("code overflow");
+    }
     code[i++] = n;
   }
   code[i] = NULL;
@@ -175,7 +178,6 @@ Type *int_type() {
 }
 
 bool define_typedef() {
-  // TODO 型定義が出てくる前のtypedefはたぶんうまくいかない
   if (!consume_kind(TK_TYPEDEF)) {
     return false;
   }
@@ -310,6 +312,9 @@ Node *stmt() {
     // TODO 100
     node->block = calloc(100, sizeof(Node));
     for(int i = 0; !consume("}"); i++) {
+      if (i > 100) {
+        error("block overflow");
+      }
       node->block[i] = stmt();
     }
     return node;
@@ -1018,7 +1023,6 @@ Node *struct_ref(Node *node) {
   member->kind = ND_MEMBER;
   member->lhs = node;
   member->member = find_member(consume_kind(TK_IDENT), node->type);
-  // TODO varname設定するべき
   member->type = member->member->ty;
   return member;
 }

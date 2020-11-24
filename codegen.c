@@ -59,7 +59,9 @@ void gen(Node *node) {
         case CHAR:
           printf("  .byte 0x%x\n", node->var->init->block[i]->val);
           break;
-        // TODO PTRの場合も考慮する必要あり。
+        case PTR:
+          printf("  .quad .LC_%d\n", node->var->init->block[i]->string->index);
+          break;
         }
       }
       return;

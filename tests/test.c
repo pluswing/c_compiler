@@ -5,8 +5,7 @@ int g_array[5] = {0, 1, 2, 3, 4};
 char g_array2[5] = {5, 6, 7, 8, 12};
 char *g_msg1 = "foo";
 char g_msg2[4] = "bar";
-// TODO これたぶん未対応
-//char *a[] = {"abc", "def"};
+char *g_strings[] = {"abc", "def"};
 
 struct Hoge {
   int a;
@@ -636,7 +635,20 @@ void test_hack() {
   struct {int a;} c[10];
   c[0].a = 10;
   assert(10, c[0].a);
-  // もうちょっとテストケース追加する。
+
+  // 配列＋arrow
+  struct {int a;} *d[2];
+  struct {int a;} e;
+  e.a = 20;
+  d[0] = &e;
+  assert(20, d[0]->a);
+
+  // FIXME 多重配列＋.
+  struct {int a;} f[2][2][2];
+  // f[0][1][1].a = 30;
+  // f[1][0][1].a = 40;
+  // assert(30, f[0][1][1].a);
+  // assert(40, f[1][0][1].a);
 }
 
 int main() {
