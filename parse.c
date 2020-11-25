@@ -971,17 +971,14 @@ Node *variable(Token *tok) {
       Node *add = calloc(1, sizeof(Node));
       add->kind = ND_ADD;
       add->lhs = node;
-      if (node->type && node->type->ty != INT) {
-        int n = node->type->ptr_to->ty == INT ? 4
-              : node->type->ptr_to->ty == CHAR ? 1 : 8;
-        add->rhs = new_binary(ND_MUL, expr(), new_node_num(n));
-      }
-      Type *type = node->type;
+      Type *type = node->type->ptr_to;
+      int n = get_size(type);
+      add->rhs = new_binary(ND_MUL, expr(), new_node_num(n));
       node = calloc(1, sizeof(Node));
       node->kind = ND_DEREF;
       node->lhs = add;
       node->varname = varname;
-      node->type = type->ptr_to;
+      node->type = type;
       expect("]");
       continue;
     }

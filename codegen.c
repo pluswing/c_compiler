@@ -82,6 +82,9 @@ void gen(Node *node) {
   case ND_DEREF:
     gen(node->lhs);
     t = get_type(node);
+    if (t->ty == ARRAY) {
+      return;
+    }
     printf("  pop rax\n");
     if (t && t->ty == CHAR) {
       printf("  movsx rax, BYTE PTR [rax]\n");
