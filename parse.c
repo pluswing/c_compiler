@@ -309,10 +309,10 @@ Node *stmt() {
   if (consume("{")) {
     node = calloc(1, sizeof(Node));
     node->kind = ND_BLOCK;
-    // TODO 100
-    node->block = calloc(100, sizeof(Node));
+    // TODO 300
+    node->block = calloc(300, sizeof(Node));
     for(int i = 0; !consume("}"); i++) {
-      if (i > 100) {
+      if (i > 300) {
         error("block overflow");
       }
       node->block[i] = stmt();
@@ -891,23 +891,46 @@ Node *define_variable(Define *def, LVar **varlist) {
   if (consume("=")) {
     // 初期化式あり
     if (consume("{")) {
-      // 配列の初期化式
       init = calloc(1, sizeof(Node));
       init->block = calloc(100, sizeof(Node));
       int i = 0;
-      for(i = 0; !consume("}"); i++) {
-        init->block[i] = expr();
-        if (consume("}")) {
-          break;
+      Token *t = token;
+      if (consume("{")) {
+        // 構造体
+        token = t;
+        while(!consume("}")) {
+          expect("{");
+          while(true) {
+            expr(); // どこかに収める
+            if (consume("}")) {
+              break;
+            }
+            expect(",");
+          }
+          // 必ず,が付いてる前提。。
+          expect(",");
         }
-        expect(",");
-      }
-      if (type->array_size < i) {
-        type->array_size = i;
-      }
-      // TODO 要確認。indexがずれてない？？
-      for (i++; i < type->array_size; i++) {
-        init->block[i] = new_node_num(0);
+        // TODO
+        i = 1;
+        if (type->array_size < i) {
+          type->array_size = i;
+        }
+      } else {
+        // 配列の初期化式
+        for(i = 0; !consume("}"); i++) {
+          init->block[i] = expr();
+          if (consume("}")) {
+            break;
+          }
+          expect(",");
+        }
+        if (type->array_size < i) {
+          type->array_size = i;
+        }
+        // TODO 要確認。indexがずれてない？？
+        for (i++; i < type->array_size; i++) {
+          init->block[i] = new_node_num(0);
+        }
       }
     } else {
       init = expr();

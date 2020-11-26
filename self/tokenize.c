@@ -153,8 +153,7 @@ struct ReservedWord {
   TokenKind kind;
 };
 
-ReservedWord reservedWords[1];
-/* = {
+ReservedWord reservedWords[] = {
   {"return", TK_RETURN},
   {"if", TK_IF},
   {"else", TK_ELSE},
@@ -177,7 +176,6 @@ ReservedWord reservedWords[1];
   {"default", TK_DEFAULT},
   {"", TK_EOF},
 };
-*/
 
 Token *tokenize() {
   char *p = user_input;
