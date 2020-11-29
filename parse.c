@@ -218,6 +218,7 @@ Type *define_struct() {
     offset += size;
     m->next = t->members;
     t->members = m;
+    // FIXME 逆につながってる。。
     if (maxSize <= 8 && maxSize < size) {
       maxSize = size;
     }
@@ -898,10 +899,18 @@ Node *define_variable(Define *def, LVar **varlist) {
       if (consume("{")) {
         // 構造体
         token = t;
+        int cnt = 0;
         while(!consume("}")) {
           expect("{");
+          cnt++;
+          Member *m = type->ptr_to->members;
           while(true) {
-            expr(); // どこかに収める
+            fprintf(stderr, "%s %d\n", m->name, m->ty->ty);
+            init->block[i] = expr();
+            init->block[i]->type = m->ty;
+            // TODO padding
+            i++;
+            m = m->next;
             if (consume("}")) {
               break;
             }
@@ -910,15 +919,18 @@ Node *define_variable(Define *def, LVar **varlist) {
           // 必ず,が付いてる前提。。
           expect(",");
         }
-        // TODO
-        i = 1;
-        if (type->array_size < i) {
-          type->array_size = i;
+        if (type->array_size < cnt) {
+          type->array_size = cnt;
         }
+        // TODO 補完処理が必要。
+        // for (i++; i < type->array_size; i++) {
+        //   init->block[i] = new_node_num(0);
+        // }
       } else {
         // 配列の初期化式
         for(i = 0; !consume("}"); i++) {
           init->block[i] = expr();
+          init->block[i]->type = type->ptr_to;
           if (consume("}")) {
             break;
           }
@@ -1056,7 +1068,6 @@ Member *find_member(Token *token, Type* type) {
   }
   char name[100] = {0};
   memcpy(name, token->str, token->len);
-  fprintf(stderr, "find member: %s\n", name);
   for (Member *m = type->members; m; m = m->next) {
     if (strcmp(name, m->name) == 0) {
       return m;

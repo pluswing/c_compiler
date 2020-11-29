@@ -52,7 +52,8 @@ void gen(Node *node) {
     }
     if (node->type->ty == ARRAY && node->var->init->block) {
       for (int i = 0; node->var->init->block[i]; i++) {
-        switch (node->type->ptr_to->ty) {
+        fprintf(stderr, "TYPE: %d\n", node->var->init->block[i]->type->ty);
+        switch (node->var->init->block[i]->type->ty) {
         case INT:
           printf("  .long 0x%x\n", node->var->init->block[i]->val);
           break;
