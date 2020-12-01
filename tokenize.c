@@ -75,7 +75,7 @@ void error_at_s(char *loc, char *fmt, char *val) {
   }
 
   int indent = fprintf(stderr, "%s:%d: ", filename, line_num);
-  fprintf(stderr, "%.*s\n", (int)(end - line), line);
+  fprintf(stderr, "%.*s\n", (end - line), line);
   int pos = loc - line + indent;
   fprintf(stderr, "%*s", pos, "");
   fprintf(stderr, "^ ");

@@ -204,6 +204,10 @@ Type *define_struct() {
   t->ty = STRUCT;
   int offset = 0;
   int maxSize = 0;
+
+  Member head;
+  Member *cur = &head;
+
   while(!consume("}")) {
     Define *def = read_define();
     read_type_suffix(def);
@@ -216,13 +220,14 @@ Type *define_struct() {
     offset = align_to(offset, size);
     m->offset = offset;
     offset += size;
-    m->next = t->members;
-    t->members = m;
+    cur->next = m;
+    cur = m;
     // FIXME 逆につながってる。。
     if (maxSize <= 8 && maxSize < size) {
       maxSize = size;
     }
   }
+  t->members = head.next;
   t->size = align_to(offset, maxSize);
 
   if (name) {
@@ -905,7 +910,6 @@ Node *define_variable(Define *def, LVar **varlist) {
           cnt++;
           Member *m = type->ptr_to->members;
           while(true) {
-            fprintf(stderr, "%s %d\n", m->name, m->ty->ty);
             init->block[i] = expr();
             init->block[i]->type = m->ty;
             // TODO padding

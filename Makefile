@@ -10,8 +10,8 @@ $(OBJS): 9cc.h
 test: 9cc
 	./test.sh
 
-self: 9cc
-	./9cc 9cc.h self/tokenize.c parse.c codegen.c main.c
+self: 9cc $(SRCS)
+	./self.sh
 
 clean:
 	rm -f 9cc *.o *~ tmp*

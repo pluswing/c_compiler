@@ -52,7 +52,6 @@ void gen(Node *node) {
     }
     if (node->type->ty == ARRAY && node->var->init->block) {
       for (int i = 0; node->var->init->block[i]; i++) {
-        fprintf(stderr, "TYPE: %d\n", node->var->init->block[i]->type->ty);
         switch (node->var->init->block[i]->type->ty) {
         case INT:
           printf("  .long 0x%x\n", node->var->init->block[i]->val);
@@ -316,7 +315,7 @@ void gen(Node *node) {
     printf("  jmp .Lend%03d\n", id);
     printf(".Ltrue%03d:\n", id);
     printf("  push 1\n");
-    printf(".Lend%d:\n", id);
+    printf(".Lend%03d:\n", id);
     return;
   case ND_TERNARY:
     // A?B:C
