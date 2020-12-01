@@ -1,8 +1,10 @@
 #include "9cc.h"
 
 int main(int argc, char **argv) {
+  printf("; main argc: %d\n", argc);
   for (int i = 1; i < argc; i++) {
     filename = argv[i];
+    printf("; file[%d] = %s\n", i, filename);
     user_input = read_file(filename);
     Token *t = tokenize();
     if (!token) {

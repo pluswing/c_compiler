@@ -475,7 +475,7 @@ int test_continue() {
     j = j + 1;
   }
   assert(10, i);
-  assert(5, j);
+  assert(6, j);
 }
 
 int test_addeq() {

@@ -165,7 +165,6 @@ void gen(Node *node) {
     // }
     gen(node->lhs->lhs); // A
     printf(".Lbegin%03d:\n", id);
-    printf(".Lcontinue%03d:\n", id);
     gen(node->lhs->rhs); // B
     if (!node->lhs->rhs) {
       printf("  push 1\n");
@@ -173,8 +172,9 @@ void gen(Node *node) {
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     printf("  je .Lend%03d\n", id);
-    gen(node->rhs->lhs); // C
     gen(node->rhs->rhs); // D
+    printf(".Lcontinue%03d:\n", id);
+    gen(node->rhs->lhs); // C
     printf("  jmp .Lbegin%03d\n", id);
     printf(".Lend%03d:\n", id);
     breakId = bid;

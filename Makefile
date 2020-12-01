@@ -10,7 +10,7 @@ $(OBJS): 9cc.h
 test: 9cc
 	./test.sh
 
-self: 9cc $(SRCS)
+self: 9cc
 	./self.sh
 
 clean:
