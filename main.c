@@ -6,7 +6,9 @@ int main(int argc, char **argv) {
     filename = argv[i];
     printf("; file[%d] = %s\n", i, filename);
     user_input = read_file(filename);
+    printf("; read_file\n");
     Token *t = tokenize();
+    printf("; tokenize\n");
     if (!token) {
       token = t;
     } else {

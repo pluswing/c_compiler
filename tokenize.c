@@ -147,6 +147,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
 }
 
 bool startswith(char *p, char *q) {
+  printf("; startswith %s\n", q);
   return memcmp(p, q, strlen(q)) == 0;
 }
 
@@ -267,6 +268,7 @@ Token *tokenize() {
     bool found = false;
     for (int i = 0; reservedWords[i].kind != TK_EOF; i++) {
       char *w = reservedWords[i].word;
+      printf("; reservedWords %s\n", w);
       int len = strlen(w);
       TokenKind kind = reservedWords[i].kind;
       if (startswith(p, w) && !is_alnum(p[len])) {

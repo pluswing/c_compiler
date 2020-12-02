@@ -177,6 +177,7 @@ typedef enum {
   ND_TERNARY_R, // ?:
   ND_SWITCH, // switch
   ND_CASE, // case
+  ND_PADDING, // struct padding
   ND_NUM,
 } NodeKind;
 

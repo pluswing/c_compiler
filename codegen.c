@@ -52,6 +52,10 @@ void gen(Node *node) {
     }
     if (node->type->ty == ARRAY && node->var->init->block) {
       for (int i = 0; node->var->init->block[i]; i++) {
+        if (node->var->init->block[i]->kind == ND_PADDING) {
+          printf("  .zero 0x%x\n", node->var->init->block[i]->size);
+          continue;
+        }
         switch (node->var->init->block[i]->type->ty) {
         case INT:
           printf("  .long 0x%x\n", node->var->init->block[i]->val);

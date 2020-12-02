@@ -909,16 +909,23 @@ Node *define_variable(Define *def, LVar **varlist) {
           expect("{");
           cnt++;
           Member *m = type->ptr_to->members;
+          int total = 0;
           while(true) {
             init->block[i] = expr();
             init->block[i]->type = m->ty;
             // TODO padding
+            total += get_size(m->ty);
             i++;
             m = m->next;
             if (consume("}")) {
               break;
             }
             expect(",");
+          }
+          if (total != type->ptr_to->size) {
+            init->block[i] = new_node(ND_PADDING);
+            init->block[i]->size = type->ptr_to->size - total;
+            i++;
           }
           // 必ず,が付いてる前提。。
           expect(",");
