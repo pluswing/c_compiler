@@ -13,7 +13,10 @@ test: 9cc
 self: 9cc
 	./self.sh
 
+self_test: 9cc_self
+	./self_test.sh
+
 clean:
 	rm -f 9cc *.o *~ tmp*
 
-.PHONY: test clean self
+.PHONY: test clean self self_test

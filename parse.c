@@ -323,6 +323,7 @@ Node *stmt() {
       }
       node->block[i] = stmt();
     }
+
     return node;
   }
 
